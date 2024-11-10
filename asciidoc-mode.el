@@ -110,12 +110,20 @@ The hook for `text-mode' is run before this one."
      (5 'asciidoc-face-bracket))
 
     ;; NOTE: Text
-    ;; 1 - NOTE:
-    ("^\\(NOTE:\\) .+$"
-     (1 'asciidoc-face-note))
+    ;; 1 - NOTE
+    ;; 2 - :
+    ("^\\(NOTE\\)\\(:\\) .+$"
+     (1 'asciidoc-face-note)
+     (2 'asciidoc-face-punctuation))
 
     ;; [NOTE]
-    ("^\\[NOTE\\]$" . asciidoc-face-note)
+    ;; 1 - [
+    ;; 2 - NOTE
+    ;; 3 - ]
+    ("^\\(\\[\\)\\(NOTE\\)\\(\\]\\)$"
+     (1 'asciidoc-face-bracket)
+     (2 'asciidoc-face-note)
+     (3 'asciidoc-face-bracket))
 
     ;; TIP: Text
     ;; 1 - TIP
@@ -210,7 +218,7 @@ The hook for `text-mode' is run before this one."
     ;; 4 - [
     ;; 5 - text
     ;; 6 - ]
-    ("^(.+)(::)(.+)(\\[)(.*)(\\])"
+    ("^\\(.+\\)\\(::\\)\\(.+\\)\\(\\[\\)\\(.*\\)\\(\\]\\)"
      (1 'asciidoc-face-macro-name)
      (2 'asciidoc-face-punctuation)
      (3 'asciidoc-face-text)
@@ -229,7 +237,7 @@ The hook for `text-mode' is run before this one."
 
     ;; One line commentary
     ;; // Commentary
-    ("^// .*$" asciidoc-face-comment)
+    ("^//.*$" asciidoc-face-comment)
 
     ;; ID:
     ;; [#id]
@@ -240,29 +248,55 @@ The hook for `text-mode' is run before this one."
      (1 'asciidoc-face-bracket)
      (2 'asciidoc-face-id)
      (3 'asciidoc-face-bracket))
+
+    ;; Unordered list items
+    ;; * List item
+    ;; ** List item (level 2)
+    ;;
+    ;; 1 - *
+    ;; 2 -  List item
+    ("^\\(\\*+\\)\\( .+\\)"
+     (1 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-default))
+
+    ;; Ordered list items
+    ;; . List item
+    ;; 1 - .
+    ;; 2 -  List item
+    ("^\\(\\.+\\)\\( .+\\)"
+     (1 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-default))
+
+    ;; Description
+    ;; Text::
+    ;; 1 - Text
+    ;; 2 - :: (2 or more colon)
+    ("^\\(.+\\)\\(:::*\\)$"
+     (1 'asciidoc-face-description)
+     (2 'asciidoc-face-punctuation))
     )
   "Default `font-lock-keywords' for `asciidoc-mode'.")
 
 ;;;###autoload
-(define-derived-mode asciidoc-mode text-mode "AsciiDoc"
-  "Major mode for editing AsciiDoc documents.
+  (define-derived-mode asciidoc-mode text-mode "AsciiDoc"
+    "Major mode for editing AsciiDoc documents.
 
 Turning on `asciidoc-mode' calls the normal hooks `text-mode-hook'
 and `asciidoc-mode-hook'.  This mode also support font-lock
 highlighting."
-  :syntax-table asciidoc-mode-syntax-table
-  :group 'asciidoc
-  (setq-local comment-start "// ")
-  (setq-local indent-tabs-mode nil)
+    :syntax-table asciidoc-mode-syntax-table
+    :group 'asciidoc
+    (setq-local comment-start "//")
+    (setq-local indent-tabs-mode nil)
 
-  ;; Font lock.
-  (setq-local font-lock-defaults '(asciidoc--font-lock-keywords t nil nil nil)))
+    ;; Font lock.
+    (setq-local font-lock-defaults '(asciidoc--font-lock-keywords t nil nil nil)))
 
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.adoc\\'" . asciidoc-mode))
+  (add-to-list 'auto-mode-alist '("\\.adoc\\'" . asciidoc-mode))
 
 
-(provide 'asciidoc-mode)
+  (provide 'asciidoc-mode)
 
 ;;; asciidoc-mode.el ends here

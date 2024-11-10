@@ -251,9 +251,10 @@
 
 (defvar asciidoc-face-macro-value 'asciidoc-face-macro-value)
 
-(defface asciidoc-face-macro-text '((t (
-                                        :inherit asciidoc-face-default
-                                        :foreground "yellow")))
+(defface asciidoc-face-macro-text
+  '((t (
+        :inherit asciidoc-face-default
+        :foreground "yellow")))
   "Face for macro text."
   :group 'asciidoc-faces)
 
@@ -300,6 +301,16 @@
 
 (defvar asciidoc-face-id 'asciidoc-face-id)
 
+
+
+(defface asciidoc-face-description
+  '((t (:inherit font-lock-constant-face)))
+  "Face for highlighting descriptions."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-description
+  'asciidoc-face-description
+  "Face name for descriptions.")
 
 
 (provide 'asciidoc-faces)
