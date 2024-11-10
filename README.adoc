@@ -1,0 +1,22 @@
+= AsciiDoc mode
+
+`asciidoc-mode` is a GNU Emacs major mode for https://docs.asciidoctor.org/[AsciiDoc] syntax support.
+
+== Installation
+
+Now this repository is not availiable in any package arhives like a MELPA, ELPA and other. You must install this package manually:
+
+. Clone this repo to any folder:
++
+[source, emacs-lisp]
+----
+git clone https://github.com/dunmaksim/asciidoc-mode.git
+----
+. Add code into your `init.el`:
++
+[source, emacs-lisp]
+----
+(use-package asciidoc-mode
+  :load-path "path/to/repository/folder/"
+  :mode ("\\.adoc\\'" . asciidoc-mode))
+----
