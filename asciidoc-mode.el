@@ -7,7 +7,7 @@
 ;; Created: October 30, 2024
 ;; Version: 0.0.1-alpha
 ;; Package-Requires: ((emacs "27.1"))
-;; Keywords: AsciiDoc
+;; Keywords: files
 ;; URL: https://github.com/dunmaksim/asciidoc-mode/
 
 ;; This file is not part of GNU Emacs.
@@ -273,8 +273,7 @@ The hook for `text-mode' is run before this one."
     ;; 2 - :: (2 or more colon)
     ("^\\(.+\\)\\(:::*\\)$"
      (1 'asciidoc-face-description)
-     (2 'asciidoc-face-punctuation))
-    )
+     (2 'asciidoc-face-punctuation)))
   "Default `font-lock-keywords' for `asciidoc-mode'.")
 
 ;;;###autoload
