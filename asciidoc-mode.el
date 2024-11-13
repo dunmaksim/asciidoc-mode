@@ -27,7 +27,7 @@
 
 ;;; Commentary:
 
-;; See the README.md file for details.
+;; See the README.adoc file for details.
 
 ;;; Code:
 
@@ -85,6 +85,7 @@ The hook for `text-mode' is run before this one."
     st)
   "Syntax table used while in `asciidoc-mode'.")
 
+;; Keywords and syntax highlightning
 (defvar asciidoc--font-lock-keywords
   '(("^= .+$" . asciidoc-face-header-1)
     ("^== .+$" . asciidoc-face-header-2)
@@ -92,9 +93,9 @@ The hook for `text-mode' is run before this one."
     ("^==== .+$" . asciidoc-face-header-4)
     ("^===== .+$" . asciidoc-face-header-5)
     ("^====== .+$" . asciidoc-face-header-6)
-    ("\\*.+\\*" . asciidoc-face-bold)
-    ("_.+_" . asciidoc-face-emphasis)
-    ("`.+`" . asciidoc-face-inline-code)
+    ("\\*\\w+\\*" . asciidoc-face-bold)
+    ("_\\w+_" . asciidoc-face-emphasis)
+    ("`\\w+`" . asciidoc-face-inline-code)
 
     ;; footnote:[Text]
     ;; 1 - footnote
@@ -102,12 +103,18 @@ The hook for `text-mode' is run before this one."
     ;; 3 - [
     ;; 4 - Text
     ;; 5 - ]
-    ("\\(footnote\\)\\(:\\)\\(\\[\\)\\(.+\\)\\(\\]\\)"
-     (1 'asciidoc-face-footnote)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-bracket)
-     (4 'asciidoc-face-footnote-text)
-     (5 'asciidoc-face-bracket))
+    ,(regexp-opt
+      (concat
+       "\\(footnote\\)" ;; 1 - footnote
+       "\\(:\\)"        ;; 2 - :
+       "\\(\\[\\)"      ;; 3 - [
+       "\\(.+\\)"       ;; 4 - Text
+       "\\(\\]\\)")     ;; 5 - ]
+      (1 'asciidoc-face-footnote)
+      (2 'asciidoc-face-punctuation)
+      (3 'asciidoc-face-bracket)
+      (4 'asciidoc-face-footnote-text)
+      (5 'asciidoc-face-bracket))
 
     ;; NOTE: Text
     ;; 1 - NOTE
@@ -171,44 +178,48 @@ The hook for `text-mode' is run before this one."
      (3 'asciidoc-face-default))
 
     ;; [CAUTION]
-    ;; 1 - [
-    ;; 2 - CAUTION
-    ;; 3 -]
-    ("^\\(\\[\\)\\(CAUTION\\)\\(\\]\\)$"
-     (1 'asciidoc-face-bracket)
-     (2 'asciidoc-face-caution)
-     (3 'asciidoc-face-bracket))
+    ,(regexp-opt
+      (concat
+       "^\\(\\[\\)"    ;; 1 - [
+       "\\(CAUTION\\)" ;; 2 - CAUTION
+       "\\(\\]\\)$")   ;; 3 - ]
+      (1 'asciidoc-face-bracket)
+      (2 'asciidoc-face-caution)
+      (3 'asciidoc-face-bracket))
 
     ;; WARNING: Text
-    ;; 1 - WARNING
-    ;; 2 - :
-    ;; 3 -  Text
-    ("^\\(WARNING\\)\\(:\\)\\( .+\\)$"
-     (1 'asciidoc-face-warning)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-default))
+    ,(regexp-opt
+      (concat
+       "^\\(WARNING\\)" ;; 1 - WARNING
+       "\\(:\\)"        ;; 2 - :
+       "\\( .+\\)$'")   ;; 3 -  Теxt
+      (1 'asciidoc-face-warning)
+      (2 'asciidoc-face-punctuation)
+      (3 'asciidoc-face-default))
 
     ;; [WARNING]
-    ;; 1 - [
-    ;; 2 - WARNING
-    ;; 3 -]
-    ("^\\(\\[\\)\\(WARNING\\)\\(\\]\\)$"
-     (1 'asciidoc-face-bracket)
-     (2 'asciidoc-face-warning)
-     (3 'asciidoc-face-bracket))
+    ,(regexp-opt
+      (concat
+       "\\(\\[\\)"     ;; 1 - [
+       "\\(WARNING\\)" ;; 2 - WARNING
+       "\\(\\]\\)")    ;; 3 - ]
+      (1 'asciidoc-face-bracket)
+      (2 'asciidoc-face-warning)
+      (3 'asciidoc-face-bracket))
 
     ;; kbd:[C-x C-c]
-    ;; 1 - kbd
-    ;; 2 - :
-    ;; 3 - [
-    ;; 4 - C-x C-c
-    ;; 5 - ]
-    ("\\(kbd\\)\\(:\\)\\(\\[\\)\\(.+\\)\\(\\]\\)"
-     (1 'asciidoc-face-kbd)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-bracket)
-     (4 'asciidoc-face-kbd-text)
-     (5 'asciidoc-face-bracket))
+    ,(regexp-opt
+      (concat
+       "\\(kbd\\)"  ;; 1 - kbd
+       "\\(\\:\\)"  ;; 2 - :
+       "\\(\\[\\)"  ;; 3 - [
+       "\\(.+\\)"   ;; 4 - C-x C-c
+       "\\(\\]\\)") ;; 5 - ]
+      (1 'asciidoc-face-kbd)
+      (2 'asciidoc-face-punctuation)
+      (3 'asciidoc-face-bracket)
+      (4 'asciidoc-face-kbd-text)
+      (5 'asciidoc-face-bracket))
 
     ;; Block macro
     ;; name::value[text]

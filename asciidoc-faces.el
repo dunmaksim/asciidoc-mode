@@ -1,4 +1,4 @@
-;;; asciidoc-faces.el --- Face definitions -*- lexical-binding: t; -*-
+;;; asciidoc-faces.el --- Face definitions for asciidoc-mode -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024 Dunaevskii Maxim
 
@@ -7,7 +7,7 @@
 ;; Created: October 30, 2024
 ;; Version: 0.0.1-alpha
 ;; Package-Requires: ((emacs "27.1"))
-;; Keywords: AsciiDoc
+;; Keywords: files
 ;; URL: https://github.com/dunmaksim/asciidoc-mode/
 
 ;; This file is not part of GNU Emacs.
