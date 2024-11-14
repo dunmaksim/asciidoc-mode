@@ -85,228 +85,349 @@ The hook for `text-mode' is run before this one."
     st)
   "Syntax table used while in `asciidoc-mode'.")
 
+
+(defconst asciidoc--regexp-header-1
+  ;; = Header 1
+  (rx line-start
+      "="
+      space
+      (one-or-more any)
+      line-end)
+  "Regexp for headers level 1.")
+
+(defconst asciidoc--regexp-header-2
+  ;; == Header 2
+  (rx line-start
+      "=="
+      space
+      (one-or-more any)
+      line-end)
+  "Regexp for headers level 2.")
+
+
+(defconst asciidoc--regexp-header-3
+  ;; === Header 3
+  (rx line-start
+      "==="
+      space
+      (one-or-more any)
+      line-end)
+  "Regexp for headers level 3.")
+
+
+(defconst asciidoc--regexp-header-4
+  ;; ==== Header 4
+  (rx line-start
+      "===="
+      space
+      (one-or-more any)
+      line-end)
+  "Regexp for headers level 4.")
+
+
+(defconst asciidoc--regexp-header-5
+  ;; ===== Header 5
+  (rx line-start
+      "====="
+      space
+      (one-or-more any)
+      line-end)
+  "Regexp for headers level 5.")
+
+
+(defconst asciidoc--regexp-header-6
+  ;; ===== Header 6
+  (rx line-start
+      "======"
+      space
+      (one-or-more any)
+      line-end)
+  "Regexp for headers level 6.")
+
+
+(defconst asciidoc--regexp-bold
+  ;; *bold text*
+  (rx "*"
+      (minimal-match (one-or-more any))
+      "*")
+  "Regexp for bold text.")
+
+
+(defconst asciidoc--regexp-emphasis
+  ;; _emphasis_
+  (rx "_"
+      (minimal-match (one-or-more any))
+      "_")
+  "Regexp for emphasis text.")
+
+
+(defconst asciidoc--regexp-inline-code
+  ;; Text `code` text
+  (rx "`"
+      (minimal-match (one-or-more any))
+      "`")
+  "Regexp for inline code block.")
+
+
 ;; Keywords and syntax highlightning
 (defvar asciidoc--font-lock-keywords
-  '(("^= .+$" . asciidoc-face-header-1)
-    ("^== .+$" . asciidoc-face-header-2)
-    ("^=== .+$" . asciidoc-face-header-3)
-    ("^==== .+$" . asciidoc-face-header-4)
-    ("^===== .+$" . asciidoc-face-header-5)
-    ("^====== .+$" . asciidoc-face-header-6)
-    ("\\*\\w+\\*" . asciidoc-face-bold)
-    ("_\\w+_" . asciidoc-face-emphasis)
-    ("`\\w+`" . asciidoc-face-inline-code)
+  `((,asciidoc--regexp-header-1 . asciidoc-face-header-1)
+    (,asciidoc--regexp-header-2 . asciidoc-face-header-2)
+    (,asciidoc--regexp-header-3 . asciidoc-face-header-3)
+    (,asciidoc--regexp-header-4 . asciidoc-face-header-4)
+    (,asciidoc--regexp-header-5 . asciidoc-face-header-5)
+    (,asciidoc--regexp-header-6 . asciidoc-face-header-6)
+
+    ;; Text styles
+    (,asciidoc--regexp-bold . asciidoc-face-bold)
+    (,asciidoc--regexp-emphasis . asciidoc-face-emphasis)
+    (,asciidoc--regexp-inline-code . asciidoc-face-inline-code)
 
     ;; footnote:[Text]
-    ;; 1 - footnote
-    ;; 2 - :
-    ;; 3 - [
-    ;; 4 - Text
-    ;; 5 - ]
-    ,(regexp-opt
-      (concat
-       "\\(footnote\\)" ;; 1 - footnote
-       "\\(:\\)"        ;; 2 - :
-       "\\(\\[\\)"      ;; 3 - [
-       "\\(.+\\)"       ;; 4 - Text
-       "\\(\\]\\)")     ;; 5 - ]
-      (1 'asciidoc-face-footnote)
-      (2 'asciidoc-face-punctuation)
-      (3 'asciidoc-face-bracket)
-      (4 'asciidoc-face-footnote-text)
-      (5 'asciidoc-face-bracket))
+    ;; (,(rx (group "footnote")
+    ;;       (group ":")
+    ;;       (group "[")
+    ;;       (group any)
+    ;;       (group "]"))
+    ;;  (1 'asciidoc-face-footnote)
+    ;;  (2 'asciidoc-face-punctuation)
+    ;;  (3 'asciidoc-face-bracket)
+    ;;  (4 'asciidoc-face-footnote-text)
+    ;;  (5 'asciidoc-face-bracket))
+    ) "Default font lock for keywords.")
 
-    ;; NOTE: Text
-    ;; 1 - NOTE
-    ;; 2 - :
-    ("^\\(NOTE\\)\\(:\\) .+$"
-     (1 'asciidoc-face-note)
-     (2 'asciidoc-face-punctuation))
+(defun asciidoc-font-lock-mark-block-function ()
+  "Function for marking inline code blocks."
+  ;; TODO: взято из `adoc-mode.el'.
+  ;; Надо понять, что тут вообще происходит.
+  (mark-paragraph 2)
+  (forward-paragraph -1))
 
-    ;; [NOTE]
-    ;; 1 - [
-    ;; 2 - NOTE
-    ;; 3 - ]
-    ("^\\(\\[\\)\\(NOTE\\)\\(\\]\\)$"
-     (1 'asciidoc-face-bracket)
-     (2 'asciidoc-face-note)
-     (3 'asciidoc-face-bracket))
+;; (add-to-list 'asciidoc--font-lock-keyword;; s
+;; '(rx-to-string (rx "*" any "*") . asciidoc-face-bold))
 
-    ;; TIP: Text
-    ;; 1 - TIP
-    ;; 2 - :
-    ;; 3 -  Text
-    ("^\\(TIP\\)\\(:\\)\\( .+\\)$"
-     (1 'asciidoc-face-tip)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-default))
+;;              ;; footnote:[Text]
+;;              ;; 1 - footnote
+;;              ;; 2 - :
+;;              ;; 3 - [
+;;              ;; 4 - Text
+;;              ;; 5 - ]
+;;              ;; (,(regexp-opt
+;;              ;;    (concat
+;;              ;;     "\\(footnote\\)" ;; 1 - footnote
+;;              ;;     "\\(:\\)"        ;; 2 - :
+;;              ;;     "\\(\\[\\)"      ;; 3 - [
+;;              ;;     "\\(.+\\)"       ;; 4 - Text
+;;              ;;     "\\(\\]\\)")     ;; 5 - ]
+;;              ;;    (1 'asciidoc-face-footnote)
+;;              ;;    (2 'asciidoc-face-punctuation)
+;;              ;;    (3 'asciidoc-face-bracket)
+;;              ;;    (4 'asciidoc-face-footnote-text)
+;;              ;;    (5 'asciidoc-face-bracket)))
 
-    ;; [TIP]
-    ;; 1 - [
-    ;; 2 - TIP
-    ;; 3 - ]
-    ("^\\(\\[\\)\\(TIP\\)\\(\\]\\)$"
-     (1 'asciidoc-face-bracket)
-     (2 'asciidoc-face-tip)
-     (3 'asciidoc-face-bracket))
+;;              ;; NOTE: Text
+;;              ;; 1 - NOTE
+;;              ;; 2 - :
+;;              ("^\\(NOTE\\)\\(:\\) .+$"
+;;               (1 'asciidoc-face-note)
+;;               (2 'asciidoc-face-punctuation))
 
-    ;; IMPORTANT: Text
-    ;; 1 - IMPORTANT
-    ;; 2 - :
-    ;; 3 -  Text
-    ("^\\(IMPORTANT\\)\\(:\\)\\( .+\\)$"
-     (1 'asciidoc-face-important)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-default))
+;;              ;; [NOTE]
+;;              ;; 1 - [
+;;              ;; 2 - NOTE
+;;              ;; 3 - ]
+;;              (,(rx-to-string (rx (group "[")
+;;                                  (group "NOTE")
+;;                                  (group "]")))
+;;               (1 'asciidoc-face-bracket)
+;;               (2 'asciidoc-face-note)
+;;               (3 'asciidoc-face-bracket))
+;;              ;; ("^\\(\\[\\)\\(NOTE\\)\\(\\]\\)$"
+;;              ;;  (1 'asciidoc-face-bracket)
+;;              ;;  (2 'asciidoc-face-note)
+;;              ;;  (3 'asciidoc-face-bracket))
 
-    ;; [IMPORTANT]
-    ;; 1 - [
-    ;; 2 - IMPORTANT
-    ;; 3 -]
-    ("^\\(\\[\\)\\(IMPORTANT\\)\\(\\]\\)$"
-     (1 'asciidoc-face-bracket)
-     (2 'asciidoc-face-important)
-     (3 'asciidoc-face-bracket))
+;;              ;; TIP: Text
+;;              ;; 1 - TIP
+;;              ;; 2 - :
+;;              ;; 3 -  Text
+;;              ("^\\(TIP\\)\\(:\\)\\( .+\\)$"
+;;               (1 'asciidoc-face-tip)
+;;               (2 'asciidoc-face-punctuation)
+;;               (3 'asciidoc-face-default))
 
-    ;; CAUTION: Text
-    ;; 1 - CAUTION
-    ;; 2 - :
-    ;; 3 - Text
-    ("^\\(CAUTION\\)\\(:\\)\\( .+\\)$"
-     (1 'asciidoc-face-caution)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-default))
+;;              ;; [TIP]
+;;              ;; 1 - [
+;;              ;; 2 - TIP
+;;              ;; 3 - ]
+;;              ("^\\(\\[\\)\\(TIP\\)\\(\\]\\)$"
+;;               (1 'asciidoc-face-bracket)
+;;               (2 'asciidoc-face-tip)
+;;               (3 'asciidoc-face-bracket))
 
-    ;; [CAUTION]
-    ,(regexp-opt
-      (concat
-       "^\\(\\[\\)"    ;; 1 - [
-       "\\(CAUTION\\)" ;; 2 - CAUTION
-       "\\(\\]\\)$")   ;; 3 - ]
-      (1 'asciidoc-face-bracket)
-      (2 'asciidoc-face-caution)
-      (3 'asciidoc-face-bracket))
+;;              ;; IMPORTANT: Text
+;;              ;; 1 - IMPORTANT
+;;              ;; 2 - :
+;;              ;; 3 -  Text
+;;              ("^\\(IMPORTANT\\)\\(:\\)\\( .+\\)$"
+;;               (1 'asciidoc-face-important)
+;;               (2 'asciidoc-face-punctuation)
+;;               (3 'asciidoc-face-default))
 
-    ;; WARNING: Text
-    ,(regexp-opt
-      (concat
-       "^\\(WARNING\\)" ;; 1 - WARNING
-       "\\(:\\)"        ;; 2 - :
-       "\\( .+\\)$'")   ;; 3 -  Теxt
-      (1 'asciidoc-face-warning)
-      (2 'asciidoc-face-punctuation)
-      (3 'asciidoc-face-default))
+;;              ;; [IMPORTANT]
+;;              ;; 1 - [
+;;              ;; 2 - IMPORTANT
+;;              ;; 3 -]
+;;              ("^\\(\\[\\)\\(IMPORTANT\\)\\(\\]\\)$"
+;;               (1 'asciidoc-face-bracket)
+;;               (2 'asciidoc-face-important)
+;;               (3 'asciidoc-face-bracket))
 
-    ;; [WARNING]
-    ,(regexp-opt
-      (concat
-       "\\(\\[\\)"     ;; 1 - [
-       "\\(WARNING\\)" ;; 2 - WARNING
-       "\\(\\]\\)")    ;; 3 - ]
-      (1 'asciidoc-face-bracket)
-      (2 'asciidoc-face-warning)
-      (3 'asciidoc-face-bracket))
+;;              ;; CAUTION: Text
+;;              ;; 1 - CAUTION
+;;              ;; 2 - :
+;;              ;; 3 - Text
+;;              ("^\\(CAUTION\\)\\(:\\)\\( .+\\)$"
+;;               (1 'asciidoc-face-caution)
+;;               (2 'asciidoc-face-punctuation)
+;;               (3 'asciidoc-face-default))
 
-    ;; kbd:[C-x C-c]
-    ,(regexp-opt
-      (concat
-       "\\(kbd\\)"  ;; 1 - kbd
-       "\\(\\:\\)"  ;; 2 - :
-       "\\(\\[\\)"  ;; 3 - [
-       "\\(.+\\)"   ;; 4 - C-x C-c
-       "\\(\\]\\)") ;; 5 - ]
-      (1 'asciidoc-face-kbd)
-      (2 'asciidoc-face-punctuation)
-      (3 'asciidoc-face-bracket)
-      (4 'asciidoc-face-kbd-text)
-      (5 'asciidoc-face-bracket))
+;;              ;; [CAUTION]
+;;              ;; ,(regexp-opt
+;;              ;;   (concat
+;;              ;;    "^\\(\\[\\)"    ;; 1 - [
+;;              ;;    "\\(CAUTION\\)" ;; 2 - CAUTION
+;;              ;;    "\\(\\]\\)$")   ;; 3 - ]
+;;              ;;   (1 'asciidoc-face-bracket)
+;;              ;;   (2 'asciidoc-face-caution)
+;;              ;;   (3 'asciidoc-face-bracket))
 
-    ;; Block macro
-    ;; name::value[text]
-    ;; 1 - name
-    ;; 2 - ::
-    ;; 3 - value
-    ;; 4 - [
-    ;; 5 - text
-    ;; 6 - ]
-    ("^\\(.+\\)\\(::\\)\\(.+\\)\\(\\[\\)\\(.*\\)\\(\\]\\)"
-     (1 'asciidoc-face-macro-name)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-text)
-     (4 'asciidoc-face-bracket)
-     (5 'asciidoc-face-macro-value)
-     (6 'asciidoc-face-bracket))
+;;              ;; WARNING: Text
+;;              ;; ,(regexp-opt
+;;              ;;   (concat
+;;              ;;    "^\\(WARNING\\)" ;; 1 - WARNING
+;;              ;;    "\\(:\\)"        ;; 2 - :
+;;              ;;    "\\( .+\\)$'")   ;; 3 -  Теxt
+;;              ;;   (1 'asciidoc-face-warning)
+;;              ;;   (2 'asciidoc-face-punctuation)
+;;              ;;   (3 'asciidoc-face-default))
 
-    ;; Block comment:
-    ;; 1. //// - comment delimiter
-    ;; 2. Commentary - commentary
-    ;; 3. //// - comment delimiter
-    ("^\\(////\n\\)\\(.+\n\\)\\(////\\)$"
-     (1 'asciidoc-face-comment-delimiter)
-     (2 'asciidoc-face-comment)
-     (3 'asciidoc-face-comment-delimiter))
+;;              ;; [WARNING]
+;;              ;; ,(regexp-opt
+;;              ;;   (concat
+;;              ;;    "\\(\\[\\)"     ;; 1 - [
+;;              ;;    "\\(WARNING\\)" ;; 2 - WARNING
+;;              ;;    "\\(\\]\\)")    ;; 3 - ]
+;;              ;;   (1 'asciidoc-face-bracket)
+;;              ;;   (2 'asciidoc-face-warning)
+;;              ;;   (3 'asciidoc-face-bracket))
 
-    ;; One line commentary
-    ;; // Commentary
-    ("^//.*$" asciidoc-face-comment)
+;;              ;; kbd:[C-x C-c]
+;;              ;; ,(regexp-opt
+;;              ;;   (concat
+;;              ;;    "\\(kbd\\)"  ;; 1 - kbd
+;;              ;;    "\\(\\:\\)"  ;; 2 - :
+;;              ;;    "\\(\\[\\)"  ;; 3 - [
+;;              ;;    "\\(.+\\)"   ;; 4 - C-x C-c
+;;              ;;    "\\(\\]\\)") ;; 5 - ]
+;;              ;;   (1 'asciidoc-face-kbd)
+;;              ;;   (2 'asciidoc-face-punctuation)
+;;              ;;   (3 'asciidoc-face-bracket)
+;;              ;;   (4 'asciidoc-face-kbd-text)
+;;              ;;   (5 'asciidoc-face-bracket))
 
-    ;; ID:
-    ;; [#id]
-    ;; 1 - [
-    ;; 2 - #id
-    ;; 3 - ]
-    ("^\\(\\[\\)\\(#.+\\)\\(\\]\\)"
-     (1 'asciidoc-face-bracket)
-     (2 'asciidoc-face-id)
-     (3 'asciidoc-face-bracket))
+;;              ;; Block macro
+;;              ;; name::value[text]
+;;              ;; 1 - name
+;;              ;; 2 - ::
+;;              ;; 3 - value
+;;              ;; 4 - [
+;;              ;; 5 - text
+;;              ;; 6 - ]
+;;              ("^\\(.+\\)\\(::\\)\\(.+\\)\\(\\[\\)\\(.*\\)\\(\\]\\)"
+;;               (1 'asciidoc-face-macro-name)
+;;               (2 'asciidoc-face-punctuation)
+;;               (3 'asciidoc-face-text)
+;;               (4 'asciidoc-face-bracket)
+;;               (5 'asciidoc-face-macro-value)
+;;               (6 'asciidoc-face-bracket))
 
-    ;; Unordered list items
-    ;; * List item
-    ;; ** List item (level 2)
-    ;;
-    ;; 1 - *
-    ;; 2 -  List item
-    ("^\\(\\*+\\)\\( .+\\)"
-     (1 'asciidoc-face-punctuation)
-     (2 'asciidoc-face-default))
+;;              ;; Block comment:
+;;              ;; 1. //// - comment delimiter
+;;              ;; 2. Commentary - commentary
+;;              ;; 3. //// - comment delimiter
+;;              ("^\\(////\n\\)\\(.+\n\\)\\(////\\)$"
+;;               (1 'asciidoc-face-comment-delimiter)
+;;               (2 'asciidoc-face-comment)
+;;               (3 'asciidoc-face-comment-delimiter))
 
-    ;; Ordered list items
-    ;; . List item
-    ;; 1 - .
-    ;; 2 -  List item
-    ("^\\(\\.+\\)\\( .+\\)"
-     (1 'asciidoc-face-punctuation)
-     (2 'asciidoc-face-default))
+;;              ;; One line commentary
+;;              ;; // Commentary
+;;              ("^//.*$" asciidoc-face-comment)
 
-    ;; Description
-    ;; Text::
-    ;; 1 - Text
-    ;; 2 - :: (2 or more colon)
-    ("^\\(.+\\)\\(:::*\\)$"
-     (1 'asciidoc-face-description)
-     (2 'asciidoc-face-punctuation)))
-  "Default `font-lock-keywords' for `asciidoc-mode'.")
+;;              ;; ID:
+;;              ;; [#id]
+;;              ;; 1 - [
+;;              ;; 2 - #id
+;;              ;; 3 - ]
+;;              ("^\\(\\[\\)\\(#.+\\)\\(\\]\\)"
+;;               (1 'asciidoc-face-bracket)
+;;               (2 'asciidoc-face-id)
+;;               (3 'asciidoc-face-bracket))
+
+;;              ;; Unordered list items
+;;              ;; * List item
+;;              ;; ** List item (level 2)
+;;              ;;
+;;              ;; 1 - *
+;;              ;; 2 -  List item
+;;              ("^\\(\\*+\\)\\( .+\\)"
+;;               (1 'asciidoc-face-punctuation)
+;;               (2 'asciidoc-face-default))
+
+;;              ;; Ordered list items
+;;              ;; . List item
+;;              ;; 1 - .
+;;              ;; 2 -  List item
+;;              ("^\\(\\.+\\)\\( .+\\)"
+;;               (1 'asciidoc-face-punctuation)
+;;               (2 'asciidoc-face-default))
+
+;;              ;; Description
+;;              ;; Text::
+;;              ;; 1 - Text
+;;              ;; 2 - :: (2 or more colon)
+;;              ("^\\(.+\\)\\(:::*\\)$"
+;;               (1 'asciidoc-face-description)
+;;               (2 'asciidoc-face-punctuation)))
+;;              "Default `font-lock-keywords' for `asciidoc-mode'.")
 
 ;;;###autoload
-  (define-derived-mode asciidoc-mode text-mode "AsciiDoc"
-    "Major mode for editing AsciiDoc documents.
+(define-derived-mode asciidoc-mode text-mode "AsciiDoc"
+  "Major mode for editing AsciiDoc documents.
 
 Turning on `asciidoc-mode' calls the normal hooks `text-mode-hook'
 and `asciidoc-mode-hook'.  This mode also support font-lock
 highlighting."
-    :syntax-table asciidoc-mode-syntax-table
-    :group 'asciidoc
-    (setq-local comment-start "//")
-    (setq-local indent-tabs-mode nil)
+  :syntax-table asciidoc-mode-syntax-table
+  :group 'asciidoc
+  (setq-local comment-start "//")
+  (setq-local indent-tabs-mode nil)
 
-    ;; Font lock.
-    (setq-local font-lock-defaults '(asciidoc--font-lock-keywords t nil nil nil)))
+  ;; Font lock.
+  (setq-local font-lock-defaults
+              '(asciidoc--font-lock-keywords
+                nil
+                nil
+                nil
+                nil
+                (font-lock-mark-block-function . asciidoc-font-lock-mark-block-function))))
 
 
 ;;;###autoload
-  (add-to-list 'auto-mode-alist '("\\.adoc\\'" . asciidoc-mode))
+(add-to-list 'auto-mode-alist '("\\.adoc\\'" . asciidoc-mode))
 
 
-  (provide 'asciidoc-mode)
+(provide 'asciidoc-mode)
 
 ;;; asciidoc-mode.el ends here
