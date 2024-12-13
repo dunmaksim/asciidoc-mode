@@ -86,19 +86,29 @@ The hook for `text-mode' is run before this one."
   "Syntax table used while in `asciidoc-mode'.")
 
 
-(defconst asciidoc--regexp-header-1
-  ;; = Header 1
+(defconst asciidoc--regexp-header-0
+  ;; = Header 0
   (rx line-start
       "="
       space
       (one-or-more any)
       line-end)
-  "Regexp for headers level 1.")
+  "Regexp for headers level 0.")
 
-(defconst asciidoc--regexp-header-2
-  ;; == Header 2
+(defconst asciidoc--regexp-header-1
+  ;; == Header 1
   (rx line-start
       "=="
+      space
+      (one-or-more any)
+      line-end)
+  "Regexp for headers level 1.")
+
+
+(defconst asciidoc--regexp-header-2
+  ;; === Header 2
+  (rx line-start
+      "==="
       space
       (one-or-more any)
       line-end)
@@ -106,9 +116,9 @@ The hook for `text-mode' is run before this one."
 
 
 (defconst asciidoc--regexp-header-3
-  ;; === Header 3
+  ;; ==== Header 3
   (rx line-start
-      "==="
+      "===="
       space
       (one-or-more any)
       line-end)
@@ -116,9 +126,9 @@ The hook for `text-mode' is run before this one."
 
 
 (defconst asciidoc--regexp-header-4
-  ;; ==== Header 4
+  ;; ===== Header 4
   (rx line-start
-      "===="
+      "====="
       space
       (one-or-more any)
       line-end)
@@ -128,21 +138,11 @@ The hook for `text-mode' is run before this one."
 (defconst asciidoc--regexp-header-5
   ;; ===== Header 5
   (rx line-start
-      "====="
-      space
-      (one-or-more any)
-      line-end)
-  "Regexp for headers level 5.")
-
-
-(defconst asciidoc--regexp-header-6
-  ;; ===== Header 6
-  (rx line-start
       "======"
       space
       (one-or-more any)
       line-end)
-  "Regexp for headers level 6.")
+  "Regexp for headers level 5.")
 
 
 (defconst asciidoc--regexp-bold
@@ -155,10 +155,19 @@ The hook for `text-mode' is run before this one."
 
 (defconst asciidoc--regexp-emphasis
   ;; _emphasis_
-  (rx "_"
-      (one-or-more any)
-      "_")
+  (rx
+   (group "_")
+   (group (one-or-more any))
+   (group "_"))
   "Regexp for emphasis text.")
+
+(defconst asciidoc--regexp-emphasis-inline
+  ;; Text with emp__has__is part of word
+  (rx
+   (group "__")
+   (group (one-or-more any))
+   (group "__"))
+  "Regexp for emphasis word part.")
 
 
 (defconst asciidoc--regexp-inline-code
@@ -169,7 +178,7 @@ The hook for `text-mode' is run before this one."
   "Regexp for inline code block.")
 
 
-(defconst asciidoc--regexp-footnote
+(defconst asciidoc--regexp-footnote-simple
   ;; Textfootnote:[Footnote text.]
   (rx (group "footnote")
       (group ":")
@@ -177,6 +186,18 @@ The hook for `text-mode' is run before this one."
       (group (one-or-more any))
       (group "]"))
   "Regexp for footnote.")
+
+
+(defconst asciidoc--regexp-footnote-ref
+  ;; footnote:ref[]
+  (rx (group "footnote")
+      (group ":")
+      (group (one-or-more any))
+      (group "[")
+      (group (zero-or-more any))
+      (group "]"))
+  "Regexp for footnote with reference.")
+
 
 (defconst asciidoc--regexp-kbd
   ;; kbd:[C-c C-v]
@@ -186,6 +207,16 @@ The hook for `text-mode' is run before this one."
       (group (one-or-more any))
       (group "]"))
   "Regexp for kbd macros.")
+
+
+;; (defconst asciidoc--regexp-image-macro
+;;   ;; image:filename[Properties]
+;;   ;; icon:filename[Properties]
+;;   ;;
+;;   ;; Original regexp from Asciidoctor.json:
+;;   ;; (?<!\\\\)(image|icon):([^:\\[][^\\[]*)\\[((?:\\\\\\]|[^\\]])*?)\\]
+;;   "(?<!\\\\)(image|icon):([^:\\[][^\\[]*)\\[((?:\\\\\\]|[^\\]])*?)\\]"
+;;   "Regexp for image macro.")
 
 
 (defconst asciidoc--regexp-note-one-line
@@ -205,9 +236,9 @@ The hook for `text-mode' is run before this one."
   (rx
    (group line-start "[NOTE]" line-end)
    (group line-start "====" line-end)
-   (group zero-or-more any line-end)
+   (group (zero-or-more any) line-end)
    (group line-start "====" line-end))
-  "Regexp for multi line note.")
+  "Regexp for multiline note.")
 
 
 (defconst asciidoc--regexp-id
@@ -237,27 +268,64 @@ The hook for `text-mode' is run before this one."
   "Regexp for block comment.")
 
 
+(defconst asciidoc--regexp-comment
+  ;; // Commentary
+  (rx line-start "//" any line-end)
+  "Regexp for one line comment.")
+
+
+(defconst asciidoc--regexp-include-directive
+  ;; include::filename.adoc[]
+  ;; Original regexp from Asciidoctor.json:
+  ;; ^(include)(::)([^\\[]+)(\\[)(.*?)(\\])$
+  (rx line-start                          ;; ^
+      (group "include")                   ;; include
+      (group "::")                        ;; ::
+      (group (not "]") (one-or-more any)) ;; ([^\\[]+)
+      (group "[")                         ;; (\\[)
+      (zero-or-more any)                  ;; (.*?)
+      (group "]")                         ;; (\\])
+      line-end)
+  "Regexp for include directive.")
+
+
 ;; Keywords and syntax highlightning
 (defvar asciidoc--font-lock-keywords
-  `((,asciidoc--regexp-header-1 . asciidoc-face-header-1)
+  `((,asciidoc--regexp-header-0 . asciidoc-face-header-0)
+    (,asciidoc--regexp-header-1 . asciidoc-face-header-1)
     (,asciidoc--regexp-header-2 . asciidoc-face-header-2)
     (,asciidoc--regexp-header-3 . asciidoc-face-header-3)
     (,asciidoc--regexp-header-4 . asciidoc-face-header-4)
     (,asciidoc--regexp-header-5 . asciidoc-face-header-5)
-    (,asciidoc--regexp-header-6 . asciidoc-face-header-6)
 
     ;; Text styles
     (,asciidoc--regexp-bold . asciidoc-face-bold)
-    (,asciidoc--regexp-emphasis . asciidoc-face-emphasis)
+    (,asciidoc--regexp-emphasis
+     (1 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-emphasis)
+     (3 'asciidoc-face-punctuation))
+    (,asciidoc--regexp-emphasis-inline
+     (1 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-emphasis)
+     (3 'asciidoc-face-punctuation))
     (,asciidoc--regexp-inline-code . asciidoc-face-inline-code)
 
-    ;; Footnote
-    (,asciidoc--regexp-footnote
+    ;; Footnote simple
+    (,asciidoc--regexp-footnote-simple
      (1 'asciidoc-face-footnote)
      (2 'asciidoc-face-punctuation)
      (3 'asciidoc-face-bracket)
      (4 'asciidoc-face-footnote-text)
      (5 'asciidoc-face-bracket))
+
+    ;; Footnote with ref
+    (,asciidoc--regexp-footnote-ref
+     (1 'asciidoc-face-footnote)
+     (2 'asciidoc-face-punctuation)
+     (3 'asciidoc-face-default)
+     (4 'asciidoc-face-bracket)
+     (5 'asciidoc-face-footnote-text)
+     (6 'asciidoc-face-bracket))
 
     ;; kbd:[Text]
     ;;  │ ││ │  └─ 5
@@ -292,6 +360,22 @@ The hook for `text-mode' is run before this one."
 
     (,asciidoc--regexp-id . asciidoc-face-id)
     (,asciidoc--regexp-comment-block . asciidoc-face-comment)
+    (,asciidoc--regexp-comment . asciidoc-face-comment)
+
+    ;; include::text[attribute]
+    ;;  │     │  │  │    │    └─ 6
+    ;;  │     │  │  │    └──── 5
+    ;;  │     │  │  └─────── 4
+    ;;  │     │  └──────── 3
+    ;;  │     └───────── 2
+    ;;  └───────────── 1
+    (,asciidoc--regexp-include-directive
+     (1 'asciidoc-face-function)
+     (2 'asciidoc-face-punctuation)
+     (3 'asciidoc-face-default)
+     (4 'asciidoc-face-bracket)
+     (5 'asciidoc-face-unquoted-string)
+     (6 'asciidoc-face-bracket))
 
     ) "Default font lock for keywords.")
 

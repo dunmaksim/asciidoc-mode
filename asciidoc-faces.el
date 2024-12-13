@@ -39,7 +39,6 @@
   :group 'faces)
 
 
-
 (defface asciidoc-face-default '((t :inherit default))
   "Face used for default text."
   :group 'asciidoc-faces)
@@ -66,6 +65,16 @@
   :group 'asciidoc-faces)
 
 (defvar asciidoc-face-attribute-value 'asciidoc-face-attribute-value)
+
+
+
+(defface asciidoc-face-header-0
+  '((t (:inherit font-lock-function-name-face)))
+  "Default face for headers at level 0."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-header-0 'asciidoc-face-header-0)
+
 
 
 (defface asciidoc-face-header-1
@@ -113,15 +122,6 @@
 
 
 
-(defface asciidoc-face-header-6
-  '((t (:inherit font-lock-function-name-face)))
-  "Default face for headers at level 6."
-  :group 'asciidoc-faces)
-
-(defvar asciidoc-face-header-6 'asciidoc-face-header-6)
-
-
-
 (defface asciidoc-face-comment
   '((t (:inherit font-lock-comment-face)))
   "Face used for comments."
@@ -133,9 +133,7 @@
 
 
 
-(defface asciidoc-face-emphasis '((t (
-                                      :inherit italic
-                                      :underline nil)))
+(defface asciidoc-face-emphasis '((t (:inherit italic)))
   "Face used for emphasis."
   :group 'asciidoc-faces)
 
@@ -161,7 +159,7 @@
 
 
 
-(defface asciidoc-face-footnote '((t (:inherit warning)))
+(defface asciidoc-face-footnote '((t (:inherit font-lock-keyword-face)))
   "Face for footnote: macros."
   :group 'asciidoc-faces)
 
@@ -187,6 +185,7 @@
 (defvar asciidoc-face-kbd 'asciidoc-face-kbd "Face name for kbd macros name.")
 
 
+
 (defface asciidoc-face-kbd-text '((t (:inherit warning)))
   "Face for :kbd:[Text] text."
   :group 'asciidoc-faces)
@@ -203,11 +202,13 @@
 (defvar asciidoc-face-note 'asciidoc-face-note)
 
 
+
 (defface asciidoc-face-tip '((t (:inherit (bold underline success))))
   "Face for tip admonition."
   :group 'asciidoc-faces)
 
 (defvar asciidoc-face-tip 'asciidoc-face-tip)
+
 
 
 (defface asciidoc-face-important '((t (:inherit (bold underline warning))))
@@ -217,6 +218,7 @@
 (defvar asciidoc-face-important 'asciidoc-face-important)
 
 
+
 (defface asciidoc-face-caution '((t (:inherit (bold underline error))))
   "Face for warning admonition."
   :group 'asciidoc-faces)
@@ -224,11 +226,13 @@
 (defvar asciidoc-face-caution 'asciidoc-face-caution)
 
 
+
 (defface asciidoc-face-warning '((t (:inherit (bold underline warning))))
   "Face for warning admonition."
   :group 'asciidoc-faces)
 
 (defvar asciidoc-face-warning 'asciidoc-face-warning)
+
 
 
 ;; Block macro:
@@ -244,12 +248,16 @@
 
 (defvar asciidoc-face-macro-name 'asciidoc-face-macro-name)
 
+
+
 (defface asciidoc-face-macro-value
   '((t (:inherit (asciidoc-face-default font-lock-function-name-face))))
   "Face for macro value."
   :group 'asciidoc-faces)
 
 (defvar asciidoc-face-macro-value 'asciidoc-face-macro-value)
+
+
 
 (defface asciidoc-face-macro-text
   '((t (
@@ -259,6 +267,7 @@
   :group 'asciidoc-faces)
 
 (defvar asciidoc-face-macro-text 'asciidoc-face-macro-text)
+
 
 
 (defface asciidoc-face-comment-delimiter
@@ -311,6 +320,29 @@
 (defvar asciidoc-face-description
   'asciidoc-face-description
   "Face name for descriptions.")
+
+
+
+(defface asciidoc-face-function
+  '((t (:inherit font-lock-function)))
+  "Face for highlighting functions."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-function
+  'asciidoc-face-function
+  "Face name for functions.")
+
+
+
+(defface asciidoc-face-unquoted-string
+  '((t (:inherit font-lock-string-face)))
+  "Face for highlighting unquoted strings."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-unquoted-string
+  'asciidoc-face-unquoted-string
+  "Face name for unquoted strings.")
+
 
 
 (provide 'asciidoc-faces)

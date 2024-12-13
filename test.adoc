@@ -10,6 +10,8 @@
 
 ====== Header level 6
 
+include::more-file.adoc[]
+
 // Комментарий
 
 Текст с *жирным* фрагментом.
@@ -27,6 +29,10 @@
 Макрос kbd:[C-x C-c].
 
 Макросfootnote:[Текст подсказки].
+
+Макрос footnote со ссылкой.footnote:disclaimer[Текст сноски].
+
+Макрос footnote со ссылкой на другую сноску: footnote:disclaimer[].
 
 // Блочный макрос:
 name::value[text]
