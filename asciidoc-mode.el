@@ -95,6 +95,7 @@ The hook for `text-mode' is run before this one."
       line-end)
   "Regexp for headers level 0.")
 
+
 (defconst asciidoc--regexp-header-1
   ;; == Header 1
   (rx line-start
@@ -148,9 +149,51 @@ The hook for `text-mode' is run before this one."
 (defconst asciidoc--regexp-bold
   ;; *bold text*
   (rx "*"
-      (minimal-match (one-or-more any))
+      (not space)
+      (one-or-more any)
+      (not space)
       "*")
   "Regexp for bold text.")
+
+
+(defconst asciidoc--regexp-subscript
+  ;; H~2~O
+  ;; Original regexp from VS Code plugin:
+  ;; (?<!\\\\)(\\[.+?\\])?((~)(\\S+?)(~))
+  ;;          │            │  │      └─ 4
+  ;;          │            │  └─ 3
+  ;;          │            └─ 2
+  ;;          └─ 1
+  (rx (not "\\")          ;; (?<!\\\\)
+      (group              ;; [.+?]
+       (zero-or-more
+        (seq "["
+             (one-or-more any)
+             "]")))
+      (group "~")
+      (group (one-or-more (not space)))
+      (group "~"))
+  "Regexp for subscript text.")
+
+
+(defconst asciidoc--regexp-superscript
+  ;; E = mc^2^
+  ;; Original regexp from VS Code plugin
+  ;; (?<!\\\\)(\\[.+?\\])?((\\^)(\\S+?)(\\^))
+  ;;          │            │    │      └─ 4
+  ;;          │            │    └─ 3
+  ;;          │            └─ 2
+  ;;          └─ 1
+  (rx (not "\\")
+      (group
+       (zero-or-more
+        (seq "["
+             (one-or-more any)
+             "]")))
+      (group "^")
+      (group (one-or-more (not space)))
+      (group "^"))
+  "Regexp for superscript text.")
 
 
 (defconst asciidoc--regexp-emphasis
@@ -160,6 +203,7 @@ The hook for `text-mode' is run before this one."
    (group (one-or-more any))
    (group "_"))
   "Regexp for emphasis text.")
+
 
 (defconst asciidoc--regexp-emphasis-inline
   ;; Text with emp__has__is part of word
@@ -207,16 +251,6 @@ The hook for `text-mode' is run before this one."
       (group (one-or-more any))
       (group "]"))
   "Regexp for kbd macros.")
-
-
-;; (defconst asciidoc--regexp-image-macro
-;;   ;; image:filename[Properties]
-;;   ;; icon:filename[Properties]
-;;   ;;
-;;   ;; Original regexp from Asciidoctor.json:
-;;   ;; (?<!\\\\)(image|icon):([^:\\[][^\\[]*)\\[((?:\\\\\\]|[^\\]])*?)\\]
-;;   "(?<!\\\\)(image|icon):([^:\\[][^\\[]*)\\[((?:\\\\\\]|[^\\]])*?)\\]"
-;;   "Regexp for image macro.")
 
 
 (defconst asciidoc--regexp-note-one-line
@@ -287,6 +321,23 @@ The hook for `text-mode' is run before this one."
       (group "]")                         ;; (\\])
       line-end)
   "Regexp for include directive.")
+
+(defconst asciidoc--regexp-list-bullet
+  ;; * item
+  ;; * item
+  ;; - item
+  ;; * item
+  ;; Original regexp from Asciidoctor.json:
+  ;; ^\\p{Blank}*(-|\\*{1,5}|\\u2022{1,5})(?=\\p{Blank})
+  (rx line-start
+      (group (one-or-more
+              (repeat 1 5 "-")
+              (repeat 1 5 "*")
+              (repeat 1 5 "•")))
+      (not space))
+  "Regexp for bullet list.")
+
+
 
 
 ;; Keywords and syntax highlightning
@@ -377,6 +428,38 @@ The hook for `text-mode' is run before this one."
      (5 'asciidoc-face-unquoted-string)
      (6 'asciidoc-face-bracket))
 
+    ;; Subscript
+    ;; Water: H2O
+    ;; H[.Property]~2~O
+    ;;  │          ││└─ 4
+    ;;  │          │└─ 3
+    ;;  │          └─ 2
+    ;;  └─ 1
+    (,asciidoc--regexp-subscript
+     (1 'asciidoc-face-attribute-name)
+     (2 'asciidoc-face-punctuation)
+     (3 'asciidoc-face-subscript)
+     (4 'asciidoc-face-punctuation))
+
+    ;; Superscript
+    ;; Energy: E = mc^2^
+    ;; E = mc[.Property]^2^
+    ;;       │          ││└─ 4
+    ;;       │          │└─ 3
+    ;;       │          └─ 2
+    ;;       └─ 1
+    (,asciidoc--regexp-superscript
+     (1 'asciidoc-face-attribute-name)
+     (2 'asciidoc-face-punctuation)
+     (3 'asciidoc-face-superscript)
+     (4 'asciidoc-face-punctuation))
+
+    ;; Bullet list
+    ;; - list item
+    ;; * list item
+    ;; • list item
+    (,asciidoc--regexp-list-bullet
+     (1 'asciidoc-face-punctuation))
     ) "Default font lock for keywords.")
 
 (defun asciidoc-font-lock-mark-block-function ()

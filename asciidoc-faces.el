@@ -141,6 +141,22 @@
 
 
 
+(defface asciidoc-face-subscript '((t (:inherit bold)))
+  "Face used for subscript."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-subscript 'asciidoc-face-subscript)
+
+
+
+(defface asciidoc-face-superscript '((t (:inherit bold)))
+  "Face user for superscript."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-superscript 'asciidoc-face-superscript)
+
+
+
 (defface asciidoc-face-bold '((t (:inherit bold)))
   "Face used for bold."
   :group 'asciidoc-faces)

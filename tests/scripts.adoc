@@ -1,0 +1,14 @@
+# Scripts
+
+## Subscript
+
+H~2~O
+
+Subsscript with [.property]H~2~O.
+
+
+## Superscript
+
+E = mc^2^
+
+Superscript with E = mc[.property]^2^.
