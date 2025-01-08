@@ -39,6 +39,49 @@
   :group 'faces)
 
 
+(defface asciidoc-face-block-attribute-heading '((t :inherit default))
+  "Face used for block attribute headings."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-block-attribute-heading 'asciiidoc-face-block-attribute-heading)
+
+
+(defface asciidoc-face-block-title '((t :inherit default))
+  "Face used for block titles."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-block-title 'asciidoc-face-block-title)
+
+
+(defface asciidoc-face-symbol-other-constant '((t :inherit font-lock-constant-face))
+  "Face used for constants."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-symbol-other-constant 'asciidoc-face-symbol-other-constant)
+
+
+(defface asciidoc-face-numeric-constant '((t :inherit font-lock-number-face))
+  "Face used for numeric constants."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-numeric-constant 'asciidoc-face-numeric-constant)
+
+
+
+(defface asciidoc-face-bullet-list-markup '((t :inherit bold))
+  "Face used for bullets in unordered lists."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-bullet-list-markup 'asciidoc-face-bullet-list-markup)
+
+
+
+(defface asciidoc-face-box-todo-markup '((t :inherit font-lock-bracket-face))
+  "Face used for checkbox items in todo-lists."
+  :group 'asciidoc-faces)
+
+
+
 (defface asciidoc-face-default '((t :inherit default))
   "Face used for default text."
   :group 'asciidoc-faces)
@@ -59,7 +102,7 @@
 
 
 (defface asciidoc-face-attribute-value '((t (
-                                             :inhrit default
+                                             :inherit default
                                              :foreground "blue")))
   "Face for attribute name."
   :group 'asciidoc-faces)
@@ -68,57 +111,19 @@
 
 
 
-(defface asciidoc-face-header-0
-  '((t (:inherit font-lock-function-name-face)))
-  "Default face for headers at level 0."
+(defface asciidoc-face-heading-markup '((t (:inherit face-attribute)))
+  "Face for headings markup."
   :group 'asciidoc-faces)
 
-(defvar asciidoc-face-header-0 'asciidoc-face-header-0)
+(defvar asciidoc-face-heading-markup 'asciidoc-face-heading-markup)
 
 
 
-(defface asciidoc-face-header-1
-  '((t (:inherit font-lock-function-name-face)))
-  "Default face for headers at level 1."
+(defface asciidoc-face-heading-space '((t (:inherit font-lock-constant-face)))
+  "Face for heading spaces."
   :group 'asciidoc-faces)
 
-(defvar asciidoc-face-header-1 'asciidoc-face-header-1)
-
-
-
-(defface asciidoc-face-header-2
-  '((t (:inherit font-lock-function-name-face)))
-  "Default face for headers at level 2."
-  :group 'asciidoc-faces)
-
-(defvar asciidoc-face-header-2 'asciidoc-face-header-2)
-
-
-
-(defface asciidoc-face-header-3
-  '((t (:inherit font-lock-function-name-face)))
-  "Default face for headers at level 3."
-  :group 'asciidoc-faces)
-
-(defvar asciidoc-face-header-3 'asciidoc-face-header-3)
-
-
-
-(defface asciidoc-face-header-4
-  '((t (:inherit font-lock-function-name-face)))
-  "Default face for headers at level 4."
-  :group 'asciidoc-faces)
-
-(defvar asciidoc-face-header-4 'asciidoc-face-header-4)
-
-
-
-(defface asciidoc-face-header-5
-  '((t (:inherit font-lock-function-name-face)))
-  "Default face for headers at level 5."
-  :group 'asciidoc-faces)
-
-(defvar asciidoc-face-header-5 'asciidoc-face-header-5)
+(defvar asciidoc-face-heading-space 'asciidoc-face-heading-space)
 
 
 

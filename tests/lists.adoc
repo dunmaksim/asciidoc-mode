@@ -17,8 +17,21 @@
 • List item 3
 • List item 4
 
+
+== Nested lists
+
 * List item 1
 ** List item 1-1
 *** List item 1-1-1
 **** List item 1-1-1-1
 ***** List item 1-1-1-1-1
+
+
+== Todo lists
+
+* [ ] Todo item
+* [*] Todo item
+* [x] Todo item
+- [ ] Todo item
+- [*] Todo item
+- [x] Todo item

@@ -86,63 +86,163 @@ The hook for `text-mode' is run before this one."
   "Syntax table used while in `asciidoc-mode'.")
 
 
+(defconst asciidoc--regexp-attribute-entry
+  ;; TODO
+  ;; Original regexp from AsciiDoctor.json
+  ;; ^(:)(!?\\w.*?)(:)(\\p{Blank}+.+\\p{Blank}(?:\\+|\\\\))$
+  (rx line-start
+      line-end)
+  "Regexp for attribute entry.")
+
+
+(defconst asciidoc--regexp-attribute-value
+  ;; TODO
+  ;; Original regexp from AsciiDoctor.json
+  ;; ^\\p{Blank}+.+$(?<!\\+|\\\\)|^\\p{Blank}*$
+  (rx line-start line-end)
+  "Regexp for attribute value.")
+
+
+(defconst asciidoc--regexp-attribute-entry-definition
+  ;; TODO
+  ;; Original regexp from AsciiDoctor.json
+  ;; ^(:)(!?\\w.*?)(:)(\\p{Blank}+(.*))?$
+  (rx line-start
+      line-end)
+  "Regexp for attribute entry definition.")
+
+
+(defconst asciidoc--regexp-block-attribute-heading
+  ;; ^\\[(|\\p{Blank}*[\\p{Word}\\{,.#\"'%].*)\\]$
+  (rx line-start                                       ;; ^
+      "["                                              ;; \\[
+      (group "|"                                       ;; |
+             (zero-or-more blank)                      ;; \\p{Blank}*
+             (any word "{" "," "." "#" """" "\\'" "%") ;; [\\p{Word}\\{,.#\"'%]
+             (zero-or-more any))                       ;; .*
+      "]"                                              ;; \\]
+      line-end)                                        ;; $
+  "Regexp for block attribute headers.")
+
+
+
 (defconst asciidoc--regexp-header-0
   ;; = Header 0
+  ;; # Header 0
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){1})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │              └─ 3
+  ;;   │          └─ 2
+  ;;   └─ 1
+  ;; TODO: check regexp
   (rx line-start
-      "="
-      space
-      (one-or-more any)
-      line-end)
+      (group (repeat 1 (or "=" "#")))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
   "Regexp for headers level 0.")
+
+
+(defconst asciidoc--regexp-block-title
+  ;; .Block title
+  ;;
+  ;; Original regexp from AsciiDoctor.json:
+  ;; ^\\.([^\\p{Blank}.].*)
+  (rx
+   line-start ;; ^
+   "."        ;; \\.
+   (group
+    (not (in "." blank)) ;; [^\\p{Blank}.]
+    (zero-or-more any))) ;; .*
+  "Regexp for block title.")
+
+
+(defconst asciidoc--regexp-callout
+  ;; <20> Callout
+  ;;
+  ;; Original regexp from AsciiDoctor.json:
+  ;; ^(<)(\\d+)(>)\\p{Blank}+(.*)$
+  (rx line-start
+      (group "<") ;; (<)
+      (group (one-or-more digit)) ;; (\\d+)
+      (group ">") ;; (>)
+      (one-or-more blank) ;; \\p{Blank}+
+      (group (zero-or-more any))
+      line-end)
+  "Regexp for callout.")
 
 
 (defconst asciidoc--regexp-header-1
   ;; == Header 1
+  ;; ## Header 1
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){2})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │              └─ 3
+  ;;   │          └─ 2
+  ;;   └─ 1
   (rx line-start
-      "=="
-      space
-      (one-or-more any)
-      line-end)
+      (group (repeat 2 (or "=" "#")))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
   "Regexp for headers level 1.")
 
 
 (defconst asciidoc--regexp-header-2
   ;; === Header 2
+  ;; ### Header
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){3})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │              └─ 3
+  ;;   │          └─ 2
+  ;;   └─ 1
   (rx line-start
-      "==="
-      space
-      (one-or-more any)
-      line-end)
+      (group (repeat 3 (or "=" "#")))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
   "Regexp for headers level 2.")
 
 
 (defconst asciidoc--regexp-header-3
   ;; ==== Header 3
+  ;; #### Header 3
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){4})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │              └─ 3
+  ;;   │          └─ 2
+  ;;   └─ 1
   (rx line-start
-      "===="
-      space
-      (one-or-more any)
-      line-end)
+      (group (repeat 4 (or "=" "#")))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
   "Regexp for headers level 3.")
 
 
 (defconst asciidoc--regexp-header-4
   ;; ===== Header 4
+  ;; ##### Header 4
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){5})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │              └─ 3
+  ;;   │          └─ 2
+  ;;   └─ 1
   (rx line-start
-      "====="
-      space
-      (one-or-more any)
-      line-end)
+      (group (repeat 5 (or "=" "#")))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
   "Regexp for headers level 4.")
 
 
 (defconst asciidoc--regexp-header-5
-  ;; ===== Header 5
+  ;; ====== Header 5
+  ;; ###### Header 5
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){6})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │              └─ 3
+  ;;   │          └─ 2
+  ;;   └─ 1
   (rx line-start
-      "======"
-      space
-      (one-or-more any)
-      line-end)
+      (group (repeat 6 (or "=" "#")))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
   "Regexp for headers level 5.")
 
 
@@ -224,7 +324,8 @@ The hook for `text-mode' is run before this one."
 
 (defconst asciidoc--regexp-footnote-simple
   ;; Textfootnote:[Footnote text.]
-  (rx (group "footnote")
+  (rx (not "\\")
+      (group "footnote")
       (group ":")
       (group "[")
       (group (one-or-more any))
@@ -234,7 +335,8 @@ The hook for `text-mode' is run before this one."
 
 (defconst asciidoc--regexp-footnote-ref
   ;; footnote:ref[]
-  (rx (group "footnote")
+  (rx (not "\\")
+      (group "footnote")
       (group ":")
       (group (one-or-more any))
       (group "[")
@@ -251,6 +353,29 @@ The hook for `text-mode' is run before this one."
       (group (one-or-more any))
       (group "]"))
   "Regexp for kbd macros.")
+
+
+(defconst asciidoc--regexp-menu-macro
+  ;; menu:File[]
+  ;; menu:File[Save > Save as])
+  ;; Original regexp from VS Code plugin
+  ;; (?<!\\\\)(menu):(\\p{Word}|\\p{Word}.*?\\S)\\[\\p{Blank}*(.+?)?\\]
+  ;;          │     ││                            ││                  └─ 6
+  ;;          │     ││                            │└─ 5
+  ;;          │     ││                            └─ 4
+  ;;          │     │└─ 3
+  ;;          │     └─ 2
+  ;;          └─ 1
+  ;; TODO: Fix regexp
+  (rx (not "\\")        ;; ?<!\\\\
+      (group "menu")    ;; (menu)
+      (group ":")       ;; :
+      (group (or word   ;; (\\p{Word}|\\p{Word}.*?\\S)
+                 (seq word (zero-or-more any) (not space))))
+      (group "[")       ;; \\[
+      (group (seq (zero-or-more blank)(one-or-more any))) ;; \\p{Blank}*(.+?)
+      (group "]"))      ;; ?\\]
+  "Regexp for menu macro.")
 
 
 (defconst asciidoc--regexp-note-one-line
@@ -322,6 +447,29 @@ The hook for `text-mode' is run before this one."
       line-end)
   "Regexp for include directive.")
 
+
+(defconst asciidoc--regexp-todo-markup
+  ;; * [ ] To do
+  ;; * [*] To do
+  ;; * [x] To do
+  ;; - [ ] To do
+  ;; - [*] To do
+  ;; - [x] To do
+  ;;
+  ;; Original regexp from AsciiDoctor.json:
+  ;; ^\\s*(-)\\p{Blank}(\\[[\\p{Blank}\\*x]\\])(?=\\p{Blank})
+  (rx line-start
+      (zero-or-more space)
+      (group "-")
+      blank
+      (group
+       "["
+       (in blank "*" "x")
+       "]")
+      blank)
+  "Regexp for todo list items.")
+
+
 (defconst asciidoc--regexp-list-bullet
   ;; * item
   ;; * item
@@ -342,12 +490,61 @@ The hook for `text-mode' is run before this one."
 
 ;; Keywords and syntax highlightning
 (defvar asciidoc--font-lock-keywords
-  `((,asciidoc--regexp-header-0 . asciidoc-face-header-0)
-    (,asciidoc--regexp-header-1 . asciidoc-face-header-1)
-    (,asciidoc--regexp-header-2 . asciidoc-face-header-2)
-    (,asciidoc--regexp-header-3 . asciidoc-face-header-3)
-    (,asciidoc--regexp-header-4 . asciidoc-face-header-4)
-    (,asciidoc--regexp-header-5 . asciidoc-face-header-5)
+
+  `(;; TODO
+    ;; (,asciidoc--regexp-attribute-entry)
+
+    ;; TODO
+    ;; (,asciidoc--regexp-attribute-value)
+
+    ;; TODO
+    ;; (,asciidoc--regexp-attribute-entry-definition)
+
+    (,asciidoc--regexp-block-attribute-heading . asciidoc-face-block-attribute-heading)
+
+    (,asciidoc--regexp-block-title . asciidoc-face-block-title)
+
+    (,asciidoc--regexp-callout
+     (1 'asciidoc-face-symbol-other-constant)
+     (2 'asciidoc-face-numeric-constant)
+     (3 'asciidoc-face-symbol-other-constant)
+     (4 'asciidoc-face-inline))
+
+    ;; - [ ] Todo
+    ;; * [ ] Todo
+    ;; - [x] Todo
+    ;; * [x] Todo
+    ;; - [*] Todo
+    ;; * [*] Todo
+    (,asciidoc--regexp-todo-markup
+     (1 'asciidoc-face-bullet-list-markup)
+     (2 'asciidoc-face-box-todo-markup))
+
+    
+    ;; Headers
+    (,asciidoc--regexp-header-0
+     (1 'asciidoc-face-header-markup)
+     (2 'asciidoc-face-header-space))
+
+    (,asciidoc--regexp-header-1
+     (1 'asciidoc-face-header-markup)
+     (2 'asciidoc-face-header-space))
+
+    (,asciidoc--regexp-header-2
+     (1 'asciidoc-face-header-markup)
+     (2 'asciidoc-face-header-space))
+
+    (,asciidoc--regexp-header-3
+     (1 'asciidoc-face-header-markup)
+     (2 'asciidoc-face-header-space))
+
+    (,asciidoc--regexp-header-4
+     (1 'asciidoc-face-header-markup)
+     (2 'asciidoc-face-header-space))
+
+    (,asciidoc--regexp-header-5
+     (1 'asciidoc-face-header-markup)
+     (2 'asciidoc-face-header-space))
 
     ;; Text styles
     (,asciidoc--regexp-bold . asciidoc-face-bold)
@@ -390,6 +587,24 @@ The hook for `text-mode' is run before this one."
      (3 'asciidoc-face-bracket)
      (4 'asciidoc-face-kbd-text)
      (5 'asciidoc-face-bracket))
+
+    ;; menu:File[]
+    ;; menu:File[Save > Save as])
+    ;; Original regexp from VS Code plugin
+    ;; (?<!\\\\)(menu):(\\p{Word}|\\p{Word}.*?\\S)\\[\\p{Blank}*(.+?)?\\]
+    ;;          │     ││                            ││                  └─ 6
+    ;;          │     ││                            │└─ 5
+    ;;          │     ││                            └─ 4
+    ;;          │     │└─ 3
+    ;;          │     └─ 2
+    ;;          └─ 1
+    (,asciidoc--regexp-menu-macro
+     (1 'asciidoc-face-macro-name)
+     (2 'asciidoc-face-punctuation)
+     (3 'asciidoc-face-attribute-value)
+     (4 'asciidoc-face-bracket)
+     (5 'asciidoc-face-unquoted-string)
+     (6 'asciidoc-face-bracket))
 
     ;; One line note
     ;; NOTE: Text
