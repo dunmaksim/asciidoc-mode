@@ -169,6 +169,11 @@
 (defvar asciidoc-face-bold 'asciidoc-face-bold)
 
 
+(defface asciidoc-face-attribute-list '((t (:inherit bold)))
+  "Face for bold text."
+  :group 'asciidoc-faces)
+
+
 (defface asciidoc-face-inline-code
   '((t (:inherit font-lock-builtin-face)))
   "Face for inline code."

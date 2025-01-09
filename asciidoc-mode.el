@@ -247,13 +247,29 @@ The hook for `text-mode' is run before this one."
 
 
 (defconst asciidoc--regexp-bold
-  ;; *bold text*
-  (rx "*"
-      (not space)
-      (one-or-more any)
-      (not space)
-      "*")
-  "Regexp for bold text.")
+  (rx "*" (one-or-more (not "*")) "*")
+  "Naive regexp for bold text.")
+
+
+;; (defconst asciidoc--regexp-strong-unconstrained
+;;   ;; Original regexp from AsciiDoctor.json:
+;;   ;; (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))
+;;   ;; TODO: FIX!!!
+;;   (rx (group (not "\\\\")) ;; (?<!\\\\\\\\)
+;;       (group "[" (one-or-more any) "]") ;; (\\[.+?\\])
+;;       (one-or-more any) ;; ?
+;;       (group "**" ;; ((\\*\\*
+;;              (one-or-more any) ;; (.+?)
+;;              "**" ;; (\\*\\*)
+;;              ))
+;;   "Regexp for unconstrained bold text.")
+
+
+;; (defconst asciidoc--regexp-strong-constrained
+;;   ;; Original regexp from AsciiDoctor.json:
+;;   ;; (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
+;;   (rx (group (not (in "\\" ";" ":" word "*"))))
+;;   "Regexp for constrained bold text.")
 
 
 (defconst asciidoc--regexp-subscript
@@ -437,13 +453,13 @@ The hook for `text-mode' is run before this one."
   ;; include::filename.adoc[]
   ;; Original regexp from Asciidoctor.json:
   ;; ^(include)(::)([^\\[]+)(\\[)(.*?)(\\])$
-  (rx line-start                          ;; ^
-      (group "include")                   ;; include
-      (group "::")                        ;; ::
-      (group (not "]") (one-or-more any)) ;; ([^\\[]+)
-      (group "[")                         ;; (\\[)
-      (zero-or-more any)                  ;; (.*?)
-      (group "]")                         ;; (\\])
+  (rx line-start                      ;; ^
+      (group "include")               ;; include
+      (group "::")                    ;; ::
+      (group (one-or-more (not "["))) ;; ([^\\[]+)
+      (group "[")                     ;; (\\[)
+      (group (zero-or-more any))      ;; (.*?)
+      (group "]")                     ;; (\\])
       line-end)
   "Regexp for include directive.")
 
@@ -523,31 +539,41 @@ The hook for `text-mode' is run before this one."
     
     ;; Headers
     (,asciidoc--regexp-header-0
-     (1 'asciidoc-face-header-markup)
-     (2 'asciidoc-face-header-space))
+     (1 'asciidoc-face-heading-markup)
+     (2 'asciidoc-face-heading-space))
 
     (,asciidoc--regexp-header-1
-     (1 'asciidoc-face-header-markup)
-     (2 'asciidoc-face-header-space))
+     (1 'asciidoc-face-heading-markup)
+     (2 'asciidoc-face-heading-space))
 
     (,asciidoc--regexp-header-2
-     (1 'asciidoc-face-header-markup)
-     (2 'asciidoc-face-header-space))
+     (1 'asciidoc-face-heading-markup)
+     (2 'asciidoc-face-heading-space))
 
     (,asciidoc--regexp-header-3
-     (1 'asciidoc-face-header-markup)
-     (2 'asciidoc-face-header-space))
+     (1 'asciidoc-face-heading-markup)
+     (2 'asciidoc-face-heading-space))
 
     (,asciidoc--regexp-header-4
-     (1 'asciidoc-face-header-markup)
-     (2 'asciidoc-face-header-space))
+     (1 'asciidoc-face-heading-markup)
+     (2 'asciidoc-face-heading-space))
 
     (,asciidoc--regexp-header-5
-     (1 'asciidoc-face-header-markup)
-     (2 'asciidoc-face-header-space))
+     (1 'asciidoc-face-heading-markup)
+     (2 'asciidoc-face-heading-space))
 
     ;; Text styles
     (,asciidoc--regexp-bold . asciidoc-face-bold)
+    ;; (,asciidoc--regexp-bold-unconstrained
+    ;;  (1 'asciidoc-face-attribute-list)
+    ;;  (2 'asciidoc-face-bold)
+    ;;  (3 'asciidoc-face-punctuation)
+    ;;  (5 'asciidoc-face-punctuation))
+    ;; (,asciidoc--regexp-bold-constrained
+    ;;  (1 'asciidoc-face-attribute-list)
+    ;;  (2 'asciidoc-face-bold)
+    ;;  (3 'asciidoc-face-punctuation)
+    ;;  (5 'asciidoc-face-punctuation))
     (,asciidoc--regexp-emphasis
      (1 'asciidoc-face-punctuation)
      (2 'asciidoc-face-emphasis)
