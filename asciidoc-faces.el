@@ -127,6 +127,14 @@
 
 
 
+(defface asciidoc-face-constant '((t (:inherit font-lock-constant-face)))
+  "Face for constants."
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-face-constant 'asciidoc-face-constant)
+
+
+
 (defface asciidoc-face-comment
   '((t (:inherit font-lock-comment-face)))
   "Face used for comments."
@@ -162,11 +170,11 @@
 
 
 
-(defface asciidoc-face-bold '((t (:inherit bold)))
+(defface asciidoc-face-bold-markup '((t (:inherit bold)))
   "Face used for bold."
   :group 'asciidoc-faces)
 
-(defvar asciidoc-face-bold 'asciidoc-face-bold)
+(defvar asciidoc-face-bold-markup 'asciidoc-face-bold-markup)
 
 
 (defface asciidoc-face-attribute-list '((t (:inherit bold)))
@@ -318,13 +326,13 @@
 
 
 
-(defface asciidoc-face-punctuation
+(defface asciidoc-face-separator-punctuation
   '((t (:inherit font-lock-punctuation-face)))
   "Face for highlighting punctuation characters."
   :group 'asciidoc-faces)
 
-(defvar asciidoc-face-punctuation
-  'asciidoc-face-punctuation
+(defvar asciidoc-face-separator-punctuation
+  'asciidoc-face-separator-punctuation
   "Face name to use for punctuation.")
 
 

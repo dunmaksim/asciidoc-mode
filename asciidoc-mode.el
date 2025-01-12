@@ -152,7 +152,8 @@ The hook for `text-mode' is run before this one."
    "."        ;; \\.
    (group
     (not (in "." blank)) ;; [^\\p{Blank}.]
-    (zero-or-more any))) ;; .*
+    (zero-or-more any)) ;; .*
+   line-end)
   "Regexp for block title.")
 
 
@@ -246,30 +247,40 @@ The hook for `text-mode' is run before this one."
   "Regexp for headers level 5.")
 
 
-(defconst asciidoc--regexp-bold
-  (rx "*" (one-or-more (not "*")) "*")
-  "Naive regexp for bold text.")
+(defconst asciidoc--regexp-strong-unconstrained
+  ;; [optional properties list]**bold text**
+  ;; Original regexp from AsciiDoctor.json:
+  ;; (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))
+  ;; TODO: CHECK!!!
+  (rx (repeat 0 "\\\\")                          ;;  (?<!\\\\\\\\)
+      (group (zero-or-more (seq "[" (one-or-more any) "]"))) ;; (\\[.+?\\])?
+      (group "**")                                           ;; \\*\\*
+      (group (one-or-more any)) ;; (.+?)
+      (group "**"))             ;; (\\*\\*)
+  "Regexp for unconstrained bold text.")
 
 
-;; (defconst asciidoc--regexp-strong-unconstrained
-;;   ;; Original regexp from AsciiDoctor.json:
-;;   ;; (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))
-;;   ;; TODO: FIX!!!
-;;   (rx (group (not "\\\\")) ;; (?<!\\\\\\\\)
-;;       (group "[" (one-or-more any) "]") ;; (\\[.+?\\])
-;;       (one-or-more any) ;; ?
-;;       (group "**" ;; ((\\*\\*
-;;              (one-or-more any) ;; (.+?)
-;;              "**" ;; (\\*\\*)
-;;              ))
-;;   "Regexp for unconstrained bold text.")
-
-
-;; (defconst asciidoc--regexp-strong-constrained
-;;   ;; Original regexp from AsciiDoctor.json:
-;;   ;; (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
-;;   (rx (group (not (in "\\" ";" ":" word "*"))))
-;;   "Regexp for constrained bold text.")
+(defconst asciidoc--regexp-strong-constrained
+  ;; Original regexp from AsciiDoctor.json:
+  ;; (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
+  ;; TODO
+  (rx (repeat 0 (in "\\" ";" ":" word "*")) ;; (?<![\\\\;:\\p{Word}\\*])
+      (group  ;; (\\[.+?\\])?
+       (zero-or-more
+        (seq
+         "["
+         (one-or-more any)
+         "]")))
+      (group "*") ;; (\\*)
+      (group (or ;;
+              (not space)
+              (seq (not space)
+                   (zero-or-more any)
+                   (not space))))
+      (group "*")
+      (repeat 0 word)
+      )
+  "Regexp for constrained bold text.")
 
 
 (defconst asciidoc--regexp-subscript
@@ -310,6 +321,57 @@ The hook for `text-mode' is run before this one."
       (group (one-or-more (not space)))
       (group "^"))
   "Regexp for superscript text.")
+
+
+;; (defconst asciidoc--regexp-typographic-double-qouted-quote
+;;   ;; 
+;;   "Regexp for double-quoted typographic quotes.")
+
+
+
+;; (defconst asciidoc--regexp-typographic-single-quoted-quote
+;;   ;; Regexp from AsciiDoctor.json:
+;;   ;; (?:^|(?<!\\p{Word}|;|:))(\\[([^\\]]+?)\\])?(\"`)(\\S|\\S.*?\\S)(`\")(?!\\p{Word})
+;;   (rx (or
+;;        line-start
+;;        (or (repeat 0 word)
+;;            ";"
+;;            ":")) ;; (?:^|(?<!\\p{Word}|;|:))
+;;       ;; (\\[([^\\]]+?)\\])?(\"`)(\\S|\\S.*?\\S)(`\")(?!\\p{Word})
+;;       )
+;;   "Regexp for single-quoted typographic quotes.")
+
+
+
+
+(defconst asciidoc--regexp-xref-reference-1
+  ;; <<xref name>>
+  ;; Original regexp from AsciiDoctor.json:
+  ;; (?<!\\\\)(?:(<<)([\\p{Word}\":./]+,)?(.*?)(>>))
+  ;; TODO: check
+  (rx (repeat 0 "\\")
+      (group "<<")
+      (group (one-or-more (in word """" ":" "." "/")))
+      (group (zero-or-more any))
+      (group ">>"))
+  "Regexp for <<xref>> macro.")
+
+
+(defconst asciidoc--regexp-xref-reference-2
+  ;; xref:[xref name]
+  ;; Original regexp from AsciiDoctor.json:
+  ;; (?<!\\\\)(xref:)([\\p{Word}\":.\\/].*?)(\\[) content "\\]|^$"
+  ;; TODO: check
+  (rx (repeat 0 "\\")
+      (group "xref:")
+      (group (seq (one-or-more (in word """" "." "\\" "/"))
+                  (zero-or-more any)))
+      (group "[") ;; (\\[)
+      (group (one-or-more any)) ;; content
+      (group (or "]" (seq line-start line-end)))
+      )
+  "Regexp for xref:[macro].")
+
 
 
 (defconst asciidoc--regexp-emphasis
@@ -383,7 +445,7 @@ The hook for `text-mode' is run before this one."
   ;;          │     └─ 2
   ;;          └─ 1
   ;; TODO: Fix regexp
-  (rx (not "\\")        ;; ?<!\\\\
+  (rx (repeat 0 "\\")   ;; ?<!\\\\
       (group "menu")    ;; (menu)
       (group ":")       ;; :
       (group (or word   ;; (\\p{Word}|\\p{Word}.*?\\S)
@@ -536,7 +598,7 @@ The hook for `text-mode' is run before this one."
      (1 'asciidoc-face-bullet-list-markup)
      (2 'asciidoc-face-box-todo-markup))
 
-    
+
     ;; Headers
     (,asciidoc--regexp-header-0
      (1 'asciidoc-face-heading-markup)
@@ -562,32 +624,45 @@ The hook for `text-mode' is run before this one."
      (1 'asciidoc-face-heading-markup)
      (2 'asciidoc-face-heading-space))
 
-    ;; Text styles
-    (,asciidoc--regexp-bold . asciidoc-face-bold)
-    ;; (,asciidoc--regexp-bold-unconstrained
-    ;;  (1 'asciidoc-face-attribute-list)
-    ;;  (2 'asciidoc-face-bold)
-    ;;  (3 'asciidoc-face-punctuation)
-    ;;  (5 'asciidoc-face-punctuation))
-    ;; (,asciidoc--regexp-bold-constrained
-    ;;  (1 'asciidoc-face-attribute-list)
-    ;;  (2 'asciidoc-face-bold)
-    ;;  (3 'asciidoc-face-punctuation)
-    ;;  (5 'asciidoc-face-punctuation))
+    ;; Unconstrained strong (bold)
+    ;; [attributes list]**Bold text**
+    ;; │           │ │        └─ 4
+    ;; │           │ └─ 3
+    ;; │           └─ 2
+    ;; └─ 1
+    (,asciidoc--regexp-strong-unconstrained
+     (1 'asciidoc-face-attribute-list)
+     (2 'asciidoc-face-separator-punctuation)
+     (3 'asciidoc-face-bold-markup)
+     (4 'asciidoc-face-separator-punctuation))
+
+    ;; Constrained strong (bold)
+    ;; [attributes list]*Bold text*
+    ;; │                ││        └─ 4
+    ;; │                │└─ 3
+    ;; │                └─ 2
+    ;; └─ 1
+    (,asciidoc--regexp-strong-constrained
+     (1 'asciidoc-face-attribute-list)
+     (2 'asciidoc-face-separator-punctuation)
+     (3 'asciidoc-face-bold-markup)
+     (4 'asciidoc-face-separator-punctuation))
+
+    ;;
     (,asciidoc--regexp-emphasis
-     (1 'asciidoc-face-punctuation)
+     (1 'asciidoc-face-separator-punctuation)
      (2 'asciidoc-face-emphasis)
-     (3 'asciidoc-face-punctuation))
+     (3 'asciidoc-face-separator-punctuation))
     (,asciidoc--regexp-emphasis-inline
-     (1 'asciidoc-face-punctuation)
+     (1 'asciidoc-face-separator-punctuation)
      (2 'asciidoc-face-emphasis)
-     (3 'asciidoc-face-punctuation))
+     (3 'asciidoc-face-separator-punctuation))
     (,asciidoc--regexp-inline-code . asciidoc-face-inline-code)
 
     ;; Footnote simple
     (,asciidoc--regexp-footnote-simple
      (1 'asciidoc-face-footnote)
-     (2 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-separator-punctuation)
      (3 'asciidoc-face-bracket)
      (4 'asciidoc-face-footnote-text)
      (5 'asciidoc-face-bracket))
@@ -595,7 +670,7 @@ The hook for `text-mode' is run before this one."
     ;; Footnote with ref
     (,asciidoc--regexp-footnote-ref
      (1 'asciidoc-face-footnote)
-     (2 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-separator-punctuation)
      (3 'asciidoc-face-default)
      (4 'asciidoc-face-bracket)
      (5 'asciidoc-face-footnote-text)
@@ -609,7 +684,7 @@ The hook for `text-mode' is run before this one."
     ;;  └───────── 1
     (,asciidoc--regexp-kbd
      (1 'asciidoc-face-kbd)
-     (2 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-separator-punctuation)
      (3 'asciidoc-face-bracket)
      (4 'asciidoc-face-kbd-text)
      (5 'asciidoc-face-bracket))
@@ -626,7 +701,7 @@ The hook for `text-mode' is run before this one."
     ;;          └─ 1
     (,asciidoc--regexp-menu-macro
      (1 'asciidoc-face-macro-name)
-     (2 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-separator-punctuation)
      (3 'asciidoc-face-attribute-value)
      (4 'asciidoc-face-bracket)
      (5 'asciidoc-face-unquoted-string)
@@ -638,7 +713,7 @@ The hook for `text-mode' is run before this one."
     ;; └──────── 1
     (,asciidoc--regexp-note-one-line
      (1 'asciidoc-face-note)
-     (2 'asciidoc-face-punctuation))
+     (2 'asciidoc-face-separator-punctuation))
 
     ;; Multiline note
     ;; [NOTE] ── 1
@@ -647,8 +722,8 @@ The hook for `text-mode' is run before this one."
     ;; ==== ──── 3
     (,asciidoc--regexp-note-multi-line
      (1 'asciidoc-face-note)
-     (2 'asciidoc-face-punctuation)
-     (3 'asciidoc-face-punctuation))
+     (2 'asciidoc-face-separator-punctuation)
+     (3 'asciidoc-face-separator-punctuation))
 
     (,asciidoc--regexp-id . asciidoc-face-id)
     (,asciidoc--regexp-comment-block . asciidoc-face-comment)
@@ -663,7 +738,7 @@ The hook for `text-mode' is run before this one."
     ;;  └───────────── 1
     (,asciidoc--regexp-include-directive
      (1 'asciidoc-face-function)
-     (2 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-separator-punctuation)
      (3 'asciidoc-face-default)
      (4 'asciidoc-face-bracket)
      (5 'asciidoc-face-unquoted-string)
@@ -678,9 +753,9 @@ The hook for `text-mode' is run before this one."
     ;;  └─ 1
     (,asciidoc--regexp-subscript
      (1 'asciidoc-face-attribute-name)
-     (2 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-separator-punctuation)
      (3 'asciidoc-face-subscript)
-     (4 'asciidoc-face-punctuation))
+     (4 'asciidoc-face-separator-punctuation))
 
     ;; Superscript
     ;; Energy: E = mc^2^
@@ -691,16 +766,29 @@ The hook for `text-mode' is run before this one."
     ;;       └─ 1
     (,asciidoc--regexp-superscript
      (1 'asciidoc-face-attribute-name)
-     (2 'asciidoc-face-punctuation)
+     (2 'asciidoc-face-separator-punctuation)
      (3 'asciidoc-face-superscript)
-     (4 'asciidoc-face-punctuation))
+     (4 'asciidoc-face-separator-punctuation))
+
+    ;; <<xref>>
+    (,asciidoc--regexp-xref-reference-1
+     (1 'asciidoc-face-constant)
+     (2 'asciidoc-face-attribute-list)
+     (3 'asciidoc-face-unquoted-string)
+     (4 'asciidoc-face-constant))
+
+    ;; xref:[link]
+    (,asciidoc--regexp-xref-reference-2
+     (1 'asciidoc-face-function-name)
+     (2 'asciidoc-face-attribute-list)
+     (3 'asciidoc-face-unquoted-string))
 
     ;; Bullet list
     ;; - list item
     ;; * list item
     ;; • list item
     (,asciidoc--regexp-list-bullet
-     (1 'asciidoc-face-punctuation))
+     (1 'asciidoc-face-separator-punctuation))
     ) "Default font lock for keywords.")
 
 (defun asciidoc-font-lock-mark-block-function ()
