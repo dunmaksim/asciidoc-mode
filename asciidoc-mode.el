@@ -125,8 +125,7 @@ The hook for `text-mode' is run before this one."
   "Regexp for block attribute headers.")
 
 
-
-(defconst asciidoc--regexp-header-0
+(defconst asciidoc--regexp-heading-0
   ;; = Header 0
   ;; # Header 0
   ;; Original regexp from plugin for VS Code:
@@ -134,12 +133,86 @@ The hook for `text-mode' is run before this one."
   ;;   │          │              └─ 3
   ;;   │          └─ 2
   ;;   └─ 1
-  ;; TODO: check regexp
   (rx line-start
-      (group (repeat 1 (or "=" "#")))
+      (repeat 1 (or "=" "#"))
       (group (one-or-more blank))
       (group (one-or-more (not space))))
   "Regexp for headers level 0.")
+
+
+(defconst asciidoc--regexp-heading-1
+  ;; == Header 1
+  ;; ## Header 1
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){2})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │
+  ;;   │          └─ 2
+  ;;   └─ 1
+  (rx line-start
+      (repeat 2 (or "=" "#"))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
+  "Regexp for headers level 2.")
+
+
+(defconst asciidoc--regexp-heading-2
+  ;; === Header 2
+  ;; ### Header 2
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){3})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │
+  ;;   │          └─ 2
+  ;;   └─ 1
+  (rx line-start
+      (repeat 3 (or "=" "#"))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
+  "Regexp for headers level 2.")
+
+
+(defconst asciidoc--regexp-heading-3
+  ;; ==== Header 3
+  ;; #### Header 3
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){4})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │
+  ;;   │          └─ 2
+  ;;   └─ 1
+  (rx line-start
+      (repeat 4 (or "=" "#"))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
+  "Regexp for headers level 3.")
+
+
+(defconst asciidoc--regexp-heading-4
+  ;; ===== Header 4
+  ;; ####= Header 4
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){5})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │
+  ;;   │          └─ 2
+  ;;   └─ 1
+  (rx line-start
+      (repeat 5 (or "=" "#"))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
+  "Regexp for headers level 4.")
+
+
+(defconst asciidoc--regexp-heading-5
+  ;; ====== Header 5
+  ;; ###### Header 5
+  ;; Original regexp from plugin for VS Code:
+  ;; ^((?:=|#){6})([\\p{Blank}]+)(?=\\S+)
+  ;;   │          │
+  ;;   │          └─ 2
+  ;;   └─ 1
+  (rx line-start
+      (repeat 6 (or "=" "#"))
+      (group (one-or-more blank))
+      (group (one-or-more (not space))))
+  "Regexp for headers level 5.")
 
 
 (defconst asciidoc--regexp-block-title
@@ -170,81 +243,6 @@ The hook for `text-mode' is run before this one."
       (group (zero-or-more any))
       line-end)
   "Regexp for callout.")
-
-
-(defconst asciidoc--regexp-header-1
-  ;; == Header 1
-  ;; ## Header 1
-  ;; Original regexp from plugin for VS Code:
-  ;; ^((?:=|#){2})([\\p{Blank}]+)(?=\\S+)
-  ;;   │          │              └─ 3
-  ;;   │          └─ 2
-  ;;   └─ 1
-  (rx line-start
-      (group (repeat 2 (or "=" "#")))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
-  "Regexp for headers level 1.")
-
-
-(defconst asciidoc--regexp-header-2
-  ;; === Header 2
-  ;; ### Header
-  ;; Original regexp from plugin for VS Code:
-  ;; ^((?:=|#){3})([\\p{Blank}]+)(?=\\S+)
-  ;;   │          │              └─ 3
-  ;;   │          └─ 2
-  ;;   └─ 1
-  (rx line-start
-      (group (repeat 3 (or "=" "#")))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
-  "Regexp for headers level 2.")
-
-
-(defconst asciidoc--regexp-header-3
-  ;; ==== Header 3
-  ;; #### Header 3
-  ;; Original regexp from plugin for VS Code:
-  ;; ^((?:=|#){4})([\\p{Blank}]+)(?=\\S+)
-  ;;   │          │              └─ 3
-  ;;   │          └─ 2
-  ;;   └─ 1
-  (rx line-start
-      (group (repeat 4 (or "=" "#")))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
-  "Regexp for headers level 3.")
-
-
-(defconst asciidoc--regexp-header-4
-  ;; ===== Header 4
-  ;; ##### Header 4
-  ;; Original regexp from plugin for VS Code:
-  ;; ^((?:=|#){5})([\\p{Blank}]+)(?=\\S+)
-  ;;   │          │              └─ 3
-  ;;   │          └─ 2
-  ;;   └─ 1
-  (rx line-start
-      (group (repeat 5 (or "=" "#")))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
-  "Regexp for headers level 4.")
-
-
-(defconst asciidoc--regexp-header-5
-  ;; ====== Header 5
-  ;; ###### Header 5
-  ;; Original regexp from plugin for VS Code:
-  ;; ^((?:=|#){6})([\\p{Blank}]+)(?=\\S+)
-  ;;   │          │              └─ 3
-  ;;   │          └─ 2
-  ;;   └─ 1
-  (rx line-start
-      (group (repeat 6 (or "=" "#")))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
-  "Regexp for headers level 5.")
 
 
 (defconst asciidoc--regexp-strong-unconstrained
@@ -278,8 +276,7 @@ The hook for `text-mode' is run before this one."
                    (zero-or-more any)
                    (not space))))
       (group "*")
-      (repeat 0 word)
-      )
+      (repeat 0 word))
   "Regexp for constrained bold text.")
 
 
@@ -321,27 +318,6 @@ The hook for `text-mode' is run before this one."
       (group (one-or-more (not space)))
       (group "^"))
   "Regexp for superscript text.")
-
-
-;; (defconst asciidoc--regexp-typographic-double-qouted-quote
-;;   ;; 
-;;   "Regexp for double-quoted typographic quotes.")
-
-
-
-;; (defconst asciidoc--regexp-typographic-single-quoted-quote
-;;   ;; Regexp from AsciiDoctor.json:
-;;   ;; (?:^|(?<!\\p{Word}|;|:))(\\[([^\\]]+?)\\])?(\"`)(\\S|\\S.*?\\S)(`\")(?!\\p{Word})
-;;   (rx (or
-;;        line-start
-;;        (or (repeat 0 word)
-;;            ";"
-;;            ":")) ;; (?:^|(?<!\\p{Word}|;|:))
-;;       ;; (\\[([^\\]]+?)\\])?(\"`)(\\S|\\S.*?\\S)(`\")(?!\\p{Word})
-;;       )
-;;   "Regexp for single-quoted typographic quotes.")
-
-
 
 
 (defconst asciidoc--regexp-xref-reference-1
@@ -400,25 +376,24 @@ The hook for `text-mode' is run before this one."
   "Regexp for inline code block.")
 
 
-(defconst asciidoc--regexp-footnote-simple
-  ;; Textfootnote:[Footnote text.]
-  (rx (not "\\")
+;; Footnotes
+;; Regexp from AsciiDoctor.json:
+;; (?<!\\\\)footnote(?:(ref):|:([\\w-]+)?)\\[(?:|(.*?[^\\\\]))\\]
+;;
+;; Syntax from AsciiDoctor Docs:
+;; Footnote with text without ID: footnote:[text]
+;; Footnote with text with ID: footnote:id[text]
+;; Footnote without text with ID: footnote:id[]
+
+(defconst asciidoc--regexp-footnote
+  ;; footnote:(ref):
+  (rx (repeat 0 "\\")
       (group "footnote")
       (group ":")
+      (group (zero-or-more (in word "-")))
       (group "[")
-      (group (one-or-more any))
-      (group "]"))
-  "Regexp for footnote.")
-
-
-(defconst asciidoc--regexp-footnote-ref
-  ;; footnote:ref[]
-  (rx (not "\\")
-      (group "footnote")
-      (group ":")
-      (group (one-or-more any))
-      (group "[")
-      (group (zero-or-more any))
+      (group (zero-or-more (seq (zero-or-more any)
+                                (not (in "\\" "]")))))
       (group "]"))
   "Regexp for footnote with reference.")
 
@@ -600,30 +575,31 @@ The hook for `text-mode' is run before this one."
 
 
     ;; Headers
-    (,asciidoc--regexp-header-0
-     (1 'asciidoc-face-heading-markup)
-     (2 'asciidoc-face-heading-space))
+    (,asciidoc--regexp-heading
+     (1 'asciidoc-face-heading-space)
+     (2 'asciidoc-face-heading-marker))
 
-    (,asciidoc--regexp-header-1
-     (1 'asciidoc-face-heading-markup)
-     (2 'asciidoc-face-heading-space))
+    (,asciidoc--regexp-heading-1
+     (1 'asciidoc-face-heading-space)
+     (2 'asciidoc-face-heading-marker))
 
-    (,asciidoc--regexp-header-2
-     (1 'asciidoc-face-heading-markup)
-     (2 'asciidoc-face-heading-space))
+    (,asciidoc--regexp-heading-2
+     (1 'asciidoc-face-heading-space)
+     (2 'asciidoc-face-heading-marker))
 
-    (,asciidoc--regexp-header-3
-     (1 'asciidoc-face-heading-markup)
-     (2 'asciidoc-face-heading-space))
+    (,asciidoc--regexp-heading-3
+     (1 'asciidoc-face-heading-space)
+     (2 'asciidoc-face-heading-marker))
 
-    (,asciidoc--regexp-header-4
-     (1 'asciidoc-face-heading-markup)
-     (2 'asciidoc-face-heading-space))
+    (,asciidoc--regexp-heading-4
+     (1 'asciidoc-face-heading-space)
+     (2 'asciidoc-face-heading-marker))
 
-    (,asciidoc--regexp-header-5
-     (1 'asciidoc-face-heading-markup)
-     (2 'asciidoc-face-heading-space))
+    (,asciidoc--regexp-heading-5
+     (1 'asciidoc-face-heading-space)
+     (2 'asciidoc-face-heading-marker))
 
+    
     ;; Unconstrained strong (bold)
     ;; [attributes list]**Bold text**
     ;; │           │ │        └─ 4
@@ -659,19 +635,17 @@ The hook for `text-mode' is run before this one."
      (3 'asciidoc-face-separator-punctuation))
     (,asciidoc--regexp-inline-code . asciidoc-face-inline-code)
 
-    ;; Footnote simple
-    (,asciidoc--regexp-footnote-simple
+    ;; footnote:id[Text]
+    ;; │       ││ ││   └─ 6
+    ;; │       ││ │└───── 5
+    ;; │       ││ └────── 4
+    ;; │       │└──────── 3
+    ;; │       └───────── 2
+    ;; └───────────────── 1
+    (,asciidoc--regexp-footnote
      (1 'asciidoc-face-footnote)
      (2 'asciidoc-face-separator-punctuation)
-     (3 'asciidoc-face-bracket)
-     (4 'asciidoc-face-footnote-text)
-     (5 'asciidoc-face-bracket))
-
-    ;; Footnote with ref
-    (,asciidoc--regexp-footnote-ref
-     (1 'asciidoc-face-footnote)
-     (2 'asciidoc-face-separator-punctuation)
-     (3 'asciidoc-face-default)
+     (3 'asciidoc-face-id)
      (4 'asciidoc-face-bracket)
      (5 'asciidoc-face-footnote-text)
      (6 'asciidoc-face-bracket))
