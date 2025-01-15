@@ -38,42 +38,31 @@
   :group 'asciidoc
   :group 'faces)
 
-
 (defface asciidoc-face-block-attribute-heading '((t :inherit default))
   "Face used for block attribute headings."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-block-attribute-heading 'asciiidoc-face-block-attribute-heading)
-
 
 (defface asciidoc-face-block-title '((t :inherit default))
   "Face used for block titles."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-block-title 'asciidoc-face-block-title)
-
 
 (defface asciidoc-face-symbol-other-constant '((t :inherit font-lock-constant-face))
   "Face used for constants."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-symbol-other-constant 'asciidoc-face-symbol-other-constant)
-
 
 (defface asciidoc-face-numeric-constant '((t :inherit font-lock-number-face))
   "Face used for numeric constants."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-numeric-constant 'asciidoc-face-numeric-constant)
-
 
 
 (defface asciidoc-face-bullet-list-markup '((t :inherit bold))
   "Face used for bullets in unordered lists."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-bullet-list-markup 'asciidoc-face-bullet-list-markup)
-
 
 
 (defface asciidoc-face-box-todo-markup '((t :inherit font-lock-bracket-face))
@@ -81,192 +70,171 @@
   :group 'asciidoc-faces)
 
 
-
 (defface asciidoc-face-default '((t :inherit default))
   "Face used for default text."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-default 'asciidoc-face-default)
-
 
 ;; Attribute
 ;; :name:value[]
 (defface asciidoc-face-attribute-name
   '((t (:inherit font-lock-keyword-face)))
   "Face for attribute name.")
-
 (defvar
   asciidoc-face-attribute-name
   'asciidoc-face-attribute-name
   "Face name for attributes.")
-
 
 (defface asciidoc-face-attribute-value '((t (
                                              :inherit default
                                              :foreground "blue")))
   "Face for attribute name."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-attribute-value 'asciidoc-face-attribute-value)
 
 
-
-(defface asciidoc-face-heading-markup '((t (:inherit face-attribute)))
-  "Face for headings markup."
+(defface asciidoc-face-heading-level-0 '((t (:inherit header-line)))
+  "Default face for section title text at level 0."
   :group 'asciidoc-faces)
-
-(defvar asciidoc-face-heading-markup 'asciidoc-face-heading-markup)
-
+(defvar asciidoc-face-heading-level-0 'asciidoc-face-heading-level-0)
 
 
-(defface asciidoc-face-heading-space '((t (:inherit font-lock-constant-face)))
-  "Face for heading spaces."
+(defface asciidoc-face-heading-level-1 '((t (:inherit header-line)))
+  "Default face for section title text at level 1."
   :group 'asciidoc-faces)
+(defvar asciidoc-face-heading-level-1 'asciidoc-face-heading-level-1)
 
-(defvar asciidoc-face-heading-space 'asciidoc-face-heading-space)
 
+(defface asciidoc-face-heading-level-2 '((t (:inherit header-line)))
+  "Default face for section title text at level 2."
+  :group 'asciidoc-faces)
+(defvar asciidoc-face-heading-level-2 'asciidoc-face-heading-level-2)
+
+
+(defface asciidoc-face-heading-level-3 '((t (:inherit header-line)))
+  "Default face for section title text at level 3."
+  :group 'asciidoc-faces)
+(defvar asciidoc-face-heading-level-3 'asciidoc-face-heading-level-3)
+
+
+(defface asciidoc-face-heading-level-4 '((t (:inherit header-line)))
+  "Default face for section title text at level 4."
+  :group 'asciidoc-faces)
+(defvar asciidoc-face-heading-level-4 'asciidoc-face-heading-level-4)
+
+(defface asciidoc-face-heading-level-5 '((t (:inherit header-line)))
+  "Default face for section title text at level 5."
+  :group 'asciidoc-faces)
+(defvar asciidoc-face-heading-level-5 'asciidoc-face-heading-level-5)
 
 
 (defface asciidoc-face-constant '((t (:inherit font-lock-constant-face)))
   "Face for constants."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-constant 'asciidoc-face-constant)
-
 
 
 (defface asciidoc-face-comment
   '((t (:inherit font-lock-comment-face)))
   "Face used for comments."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-comment
   'asciidoc-face-comment
   "Face name for comment.")
 
 
-
 (defface asciidoc-face-emphasis '((t (:inherit italic)))
   "Face used for emphasis."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-emphasis 'asciidoc-face-emphasis)
-
 
 
 (defface asciidoc-face-subscript '((t (:inherit bold)))
   "Face used for subscript."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-subscript 'asciidoc-face-subscript)
-
 
 
 (defface asciidoc-face-superscript '((t (:inherit bold)))
   "Face user for superscript."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-superscript 'asciidoc-face-superscript)
-
 
 
 (defface asciidoc-face-bold-markup '((t (:inherit bold)))
   "Face used for bold."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-bold-markup 'asciidoc-face-bold-markup)
-
 
 (defface asciidoc-face-attribute-list '((t (:inherit bold)))
   "Face for bold text."
   :group 'asciidoc-faces)
 
-
 (defface asciidoc-face-inline-code
   '((t (:inherit font-lock-builtin-face)))
   "Face for inline code."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-inline-code
   'asciidoc-face-inline-code
   "Face name for inline code.")
 
 
-
 (defface asciidoc-face-footnote '((t (:inherit font-lock-keyword-face)))
   "Face for footnote: macros."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-footnote 'asciidoc-face-footnote)
-
 
 (defface asciidoc-face-footnote-text
   '((t (:inherit font-lock-doc-face)))
   "Face for footnote text."
   :group 'asciidoc-faces)
-
 (defvar
   asciidoc-face-footnote-text
   'asciidoc-face-footnote-text
   "Face name for footnote text.")
 
 
-
 (defface asciidoc-face-kbd '((t (:inherit font-lock-keyword-face)))
   "Face for kbd: macros."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-kbd 'asciidoc-face-kbd "Face name for kbd macros name.")
-
 
 
 (defface asciidoc-face-kbd-text '((t (:inherit warning)))
   "Face for :kbd:[Text] text."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-kbd-text 'asciidoc-face-kbd-text)
-
 
 ;; ADMONITIONS
 
 (defface asciidoc-face-note '((t (:inherit (bold underline success))))
   "Face for note adminition."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-note 'asciidoc-face-note)
-
 
 
 (defface asciidoc-face-tip '((t (:inherit (bold underline success))))
   "Face for tip admonition."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-tip 'asciidoc-face-tip)
-
 
 
 (defface asciidoc-face-important '((t (:inherit (bold underline warning))))
   "Face for important admonition."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-important 'asciidoc-face-important)
-
 
 
 (defface asciidoc-face-caution '((t (:inherit (bold underline error))))
   "Face for warning admonition."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-caution 'asciidoc-face-caution)
-
 
 
 (defface asciidoc-face-warning '((t (:inherit (bold underline warning))))
   "Face for warning admonition."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-warning 'asciidoc-face-warning)
-
 
 
 ;; Block macro:
@@ -279,18 +247,14 @@
   '((t (:inherit (asciidoc-face-default font-lock-keyword-face))))
   "Face for macro name."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-macro-name 'asciidoc-face-macro-name)
-
 
 
 (defface asciidoc-face-macro-value
   '((t (:inherit (asciidoc-face-default font-lock-function-name-face))))
   "Face for macro value."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-macro-value 'asciidoc-face-macro-value)
-
 
 
 (defface asciidoc-face-macro-text
@@ -299,84 +263,68 @@
         :foreground "yellow")))
   "Face for macro text."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-macro-text 'asciidoc-face-macro-text)
-
 
 
 (defface asciidoc-face-comment-delimiter
   '((t (:inherit font-lock-comment-delimiter-face)))
   "Face for comment delimiters."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-comment-delimiter
   'asciidoc-face-comment-delimiter
   "Face name to use for delimiters.")
-
 
 
 (defface asciidoc-face-bracket
   '((t (:inherit font-lock-bracket-face)))
   "Face used to highlight brackets, braces, and parens."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-bracket
   'asciidoc-face-bracket
   "Face name to use for brackets.")
-
 
 
 (defface asciidoc-face-separator-punctuation
   '((t (:inherit font-lock-punctuation-face)))
   "Face for highlighting punctuation characters."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-separator-punctuation
   'asciidoc-face-separator-punctuation
   "Face name to use for punctuation.")
-
 
 
 (defface asciidoc-face-id
   '((t (:inherit font-lock-variable-name-face)))
   "Face for highlighting ID in text."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-id 'asciidoc-face-id)
-
 
 
 (defface asciidoc-face-description
   '((t (:inherit font-lock-constant-face)))
   "Face for highlighting descriptions."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-description
   'asciidoc-face-description
   "Face name for descriptions.")
-
 
 
 (defface asciidoc-face-function
   '((t (:inherit font-lock-function)))
   "Face for highlighting functions."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-function
   'asciidoc-face-function
   "Face name for functions.")
-
 
 
 (defface asciidoc-face-unquoted-string
   '((t (:inherit font-lock-string-face)))
   "Face for highlighting unquoted strings."
   :group 'asciidoc-faces)
-
 (defvar asciidoc-face-unquoted-string
   'asciidoc-face-unquoted-string
   "Face name for unquoted strings.")
-
 
 
 (provide 'asciidoc-faces)

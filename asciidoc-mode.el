@@ -134,9 +134,10 @@ The hook for `text-mode' is run before this one."
   ;;   │          └─ 2
   ;;   └─ 1
   (rx line-start
-      (repeat 1 (or "=" "#"))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
+      (group (seq (repeat 1 (or "=" "#"))
+                  (one-or-more blank)
+                  (zero-or-more (not space))
+                  (zero-or-more any))))
   "Regexp for headers level 0.")
 
 
@@ -149,10 +150,11 @@ The hook for `text-mode' is run before this one."
   ;;   │          └─ 2
   ;;   └─ 1
   (rx line-start
-      (repeat 2 (or "=" "#"))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
-  "Regexp for headers level 2.")
+      (group (seq (repeat 2 (or "=" "#"))
+                  (one-or-more blank)
+                  (zero-or-more (not space))
+                  (zero-or-more any))))
+  "Regexp for headers level 1.")
 
 
 (defconst asciidoc--regexp-heading-2
@@ -164,9 +166,10 @@ The hook for `text-mode' is run before this one."
   ;;   │          └─ 2
   ;;   └─ 1
   (rx line-start
-      (repeat 3 (or "=" "#"))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
+      (group (seq (repeat 3 (or "=" "#"))
+                  (one-or-more blank)
+                  (zero-or-more (not space))
+                  (zero-or-more any))))
   "Regexp for headers level 2.")
 
 
@@ -179,9 +182,10 @@ The hook for `text-mode' is run before this one."
   ;;   │          └─ 2
   ;;   └─ 1
   (rx line-start
-      (repeat 4 (or "=" "#"))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
+      (group (seq (repeat 4 (or "=" "#"))
+                  (one-or-more blank)
+                  (zero-or-more (not space))
+                  (zero-or-more any))))
   "Regexp for headers level 3.")
 
 
@@ -194,9 +198,10 @@ The hook for `text-mode' is run before this one."
   ;;   │          └─ 2
   ;;   └─ 1
   (rx line-start
-      (repeat 5 (or "=" "#"))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
+      (group (seq (repeat 5 (or "=" "#"))
+                  (one-or-more blank)
+                  (zero-or-more (not space))
+                  (zero-or-more any))))
   "Regexp for headers level 4.")
 
 
@@ -209,9 +214,10 @@ The hook for `text-mode' is run before this one."
   ;;   │          └─ 2
   ;;   └─ 1
   (rx line-start
-      (repeat 6 (or "=" "#"))
-      (group (one-or-more blank))
-      (group (one-or-more (not space))))
+      (group (seq (repeat 6 (or "=" "#"))
+                  (one-or-more blank)
+                  (zero-or-more (not space))
+                  (zero-or-more any))))
   "Regexp for headers level 5.")
 
 
@@ -575,31 +581,13 @@ The hook for `text-mode' is run before this one."
 
 
     ;; Headers
-    (,asciidoc--regexp-heading
-     (1 'asciidoc-face-heading-space)
-     (2 'asciidoc-face-heading-marker))
+    (,asciidoc--regexp-heading-0 . asciidoc-face-heading-level-0)
+    (,asciidoc--regexp-heading-1 . asciidoc-face-heading-level-1)
+    (,asciidoc--regexp-heading-2 . asciidoc-face-heading-level-2)
+    (,asciidoc--regexp-heading-3 . asciidoc-face-heading-level-3)
+    (,asciidoc--regexp-heading-4 . asciidoc-face-heading-level-4)
+    (,asciidoc--regexp-heading-5 . asciidoc-face-heading-level-5)
 
-    (,asciidoc--regexp-heading-1
-     (1 'asciidoc-face-heading-space)
-     (2 'asciidoc-face-heading-marker))
-
-    (,asciidoc--regexp-heading-2
-     (1 'asciidoc-face-heading-space)
-     (2 'asciidoc-face-heading-marker))
-
-    (,asciidoc--regexp-heading-3
-     (1 'asciidoc-face-heading-space)
-     (2 'asciidoc-face-heading-marker))
-
-    (,asciidoc--regexp-heading-4
-     (1 'asciidoc-face-heading-space)
-     (2 'asciidoc-face-heading-marker))
-
-    (,asciidoc--regexp-heading-5
-     (1 'asciidoc-face-heading-space)
-     (2 'asciidoc-face-heading-marker))
-
-    
     ;; Unconstrained strong (bold)
     ;; [attributes list]**Bold text**
     ;; │           │ │        └─ 4
