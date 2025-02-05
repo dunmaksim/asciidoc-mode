@@ -1,0 +1,9 @@
+# Monospace Font Lock
+
+Unconstrained ``monospace`` text.
+
+Constrained `monospace` text.
+
+Unconstrained [class="black"]``monospace`` text with attributes.
+
+Constrained [class="black"]`monospace` text with attributes.

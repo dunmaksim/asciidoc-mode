@@ -61,27 +61,43 @@ The hook for `text-mode' is run before this one."
 ;; SYNTAX TABLE
 (defvar asciidoc-mode-syntax-table
   (let ((st (copy-syntax-table text-mode-syntax-table)))
+    ;; Escape char is "\"
+    (modify-syntax-entry ?\ "\\" st)
+    ;; Space chars
+    (modify-syntax-entry ?\s " " st) ;; SPACE
+    (modify-syntax-entry ?\t " " st) ;; TAB
+    (modify-syntax-entry ?  " " st)  ;; NON-BREACKABLE SPACE
+    ;; Punctuation char
+    (modify-syntax-entry ?! "." st)
     (modify-syntax-entry ?$ "." st)
     (modify-syntax-entry ?% "." st)
     (modify-syntax-entry ?& "." st)
     (modify-syntax-entry ?' "." st)
-    (modify-syntax-entry ?` "\"`  " st)
-    (modify-syntax-entry ?* "\"*  " st)
     (modify-syntax-entry ?+ "." st)
+    (modify-syntax-entry ?, "." st)
     (modify-syntax-entry ?- "." st)
-    (modify-syntax-entry ?/ "." st)
+    (modify-syntax-entry ?. "." st)
     (modify-syntax-entry ?< "." st)
     (modify-syntax-entry ?= "." st)
     (modify-syntax-entry ?> "." st)
-    (modify-syntax-entry ?\\ "\\" st)
-    (modify-syntax-entry ?_ "." st)
-    (modify-syntax-entry ?| "." st)
+    (modify-syntax-entry ?? "." st)
+    (modify-syntax-entry ?` "." st)
     (modify-syntax-entry ?« "." st)
     (modify-syntax-entry ?» "." st)
-    (modify-syntax-entry ?‘ "." st)
-    (modify-syntax-entry ?’ "." st)
-    (modify-syntax-entry ?“ "." st)
-    (modify-syntax-entry ?” "." st)
+
+    ;; Words and symbols delimiters
+    (modify-syntax-entry ?_ "_" st)
+    (modify-syntax-entry ?– "_" st) ;; EN DASH
+    (modify-syntax-entry ?— "_" st) ;; EM DASH
+
+    ;; Paired delimiters
+    (modify-syntax-entry ?\( "()" st)
+    (modify-syntax-entry ?\) ")(" st)
+    (modify-syntax-entry ?\[ "(]" st)
+    (modify-syntax-entry ?\] ")]" st)
+    (modify-syntax-entry ?\{ "(}" st)
+    (modify-syntax-entry ?\} "){" st)
+
     st)
   "Syntax table used while in `asciidoc-mode'.")
 
@@ -374,40 +390,75 @@ The hook for `text-mode' is run before this one."
   "Regexp for emphasis word part.")
 
 
-(defconst asciidoc--regexp-inline-code
-  ;; Text `code` text
-  (rx "`"
-      (minimal-match (one-or-more any))
-      "`")
-  "Regexp for inline code block.")
+(defconst asciidoc--regexp-monospace-unconstrained
+  ;; Text ``code`` text
+  ;; Regexp from AsciiDoctor.json:
+  ;; (?<!\\\\)(\\[.+?\\])?((``)(.+?)(``))
+  ;; TODO: check regexp
+  (rx (repeat 0 "\\\\")
+      (group (zero-or-more (seq "["
+                                (one-or-more any)
+                                "]")))
+      (group (repeat 2 ?`))
+      (group (one-or-more any))
+      (group (repeat 2 ?`)))
+  "Regexp for unconstrained inline code block.")
 
 
-;; Footnotes
-;; Regexp from AsciiDoctor.json:
-;; (?<!\\\\)footnote(?:(ref):|:([\\w-]+)?)\\[(?:|(.*?[^\\\\]))\\]
-;;
-;; Syntax from AsciiDoctor Docs:
-;; Footnote with text without ID: footnote:[text]
-;; Footnote with text with ID: footnote:id[text]
-;; Footnote without text with ID: footnote:id[]
+(defconst asciidoc--regexp-monospace-constrained
+  ;; Text `code`'text
+  ;; Regexp from AsciiDoctor.json:
+  ;; (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(?![\\p{Word}\"'`])
+  ;; TODO: check regexp
+  (rx (repeat 0 (in ?\\
+                    ";"
+                    ":"
+                    word
+                    ?\"
+                    "'"
+                    "`"))
+      (group (zero-or-more (seq "]"
+                                (one-or-more any)
+                                "]")))
+      (group ?`)
+      (group (or (not space)
+                 (seq (not space)
+                      (zero-or-more any)
+                      (not space))))
+      (group ?`)
+      (repeat 0 (in word
+                    ?\"
+                    ?'
+                    ?`)))
+  "Regexp for constrained inline code block.")
 
-(defconst asciidoc--regexp-footnote
-  ;; footnote:(ref):
-  (rx (repeat 0 "\\")
-      (group "footnote")
-      (group ":")
-      (group (zero-or-more (in word "-")))
-      (group "[")
-      (group (zero-or-more (seq (zero-or-more any)
-                                (not (in "\\" "]")))))
-      (group "]"))
-  "Regexp for footnote with reference.")
+
+;; ;; Footnotes
+;; ;; Regexp from AsciiDoctor.json:
+;; ;; (?<!\\\\)footnote(?:(ref):|:([\\w-]+)?)\\[(?:|(.*?[^\\\\]))\\]
+;; ;;
+;; ;; Syntax from AsciiDoctor Docs:
+;; ;; Footnote with text without ID: footnote:[text]
+;; ;; Footnote with text with ID: footnote:id[text]
+;; ;; Footnote without text with ID: footnote:id[]
+;; ;; TODO: FIX!
+;; (defconst asciidoc--regexp-footnote
+;;   ;; footnote:(ref):
+;;   (rx (repeat 0 "\\")
+;;       "footnote"
+;;       (or
+;;        ;; footnote:id[]
+;;        (seq (one-or-more (in word ?-)) "[]")
+;;        ;; footnote:[Text]
+;;        ;; footnote:id[Text]
+;;        ))
+;;   "Regexp for footnote with reference.")
 
 
 (defconst asciidoc--regexp-kbd
   ;; kbd:[C-c C-v]
   (rx (group "kbd")
-      (group ":")
+      (group ?:)
       (group "[")
       (group (one-or-more any))
       (group "]"))
@@ -467,6 +518,7 @@ The hook for `text-mode' is run before this one."
       "]"
       line-end)
   "Regexp for identifiers.")
+
 
 (defconst asciidoc--regexp-comment-block
   ;; ////
@@ -529,22 +581,38 @@ The hook for `text-mode' is run before this one."
   "Regexp for todo list items.")
 
 
-(defconst asciidoc--regexp-list-bullet
-  ;; * item
+(defconst asciidoc--regexp-list-unordered
   ;; * item
   ;; - item
-  ;; * item
+  ;; • item
   ;; Original regexp from Asciidoctor.json:
   ;; ^\\p{Blank}*(-|\\*{1,5}|\\u2022{1,5})(?=\\p{Blank})
   (rx line-start
-      (group (one-or-more
-              (repeat 1 5 "-")
-              (repeat 1 5 "*")
-              (repeat 1 5 "•")))
-      (not space))
-  "Regexp for bullet list.")
+      (zero-or-more blank)
+      (group (or ?-
+                 (repeat 1 5 ?*)
+                 (repeat 1 5 ?•)))
+      (group (not space)))
+  "Regexp for unordered list.")
 
 
+(defconst asciidoc--regexp-list-ordered
+  ;; . Item
+  ;; .. Item
+  ;; a. Item
+  ;; I. Item
+  ;;
+  ;; Original regexp from AsciiDoctor.json:
+  ;; ^\\p{Blank}*(\\.{1,5}|\\d+\\.|[a-zA-Z]\\.|[IVXivx]+\\))(?=\\p{Blank})
+  (rx line-start
+      (zero-or-more blank)
+      (or (repeat 1 5 ?.)
+          (seq (one-or-more digit) ?.)
+          (seq (in "a-zA-Z") ?.)
+          (seq (one-or-more (in "IVXivx"))
+               ?\) ))
+      blank)
+  "Regexp for ordered list.")
 
 
 ;; Keywords and syntax highlightning
@@ -617,26 +685,39 @@ The hook for `text-mode' is run before this one."
      (1 'asciidoc-face-separator-punctuation)
      (2 'asciidoc-face-emphasis)
      (3 'asciidoc-face-separator-punctuation))
+
     (,asciidoc--regexp-emphasis-inline
      (1 'asciidoc-face-separator-punctuation)
      (2 'asciidoc-face-emphasis)
      (3 'asciidoc-face-separator-punctuation))
-    (,asciidoc--regexp-inline-code . asciidoc-face-inline-code)
 
-    ;; footnote:id[Text]
-    ;; │       ││ ││   └─ 6
-    ;; │       ││ │└───── 5
-    ;; │       ││ └────── 4
-    ;; │       │└──────── 3
-    ;; │       └───────── 2
-    ;; └───────────────── 1
-    (,asciidoc--regexp-footnote
-     (1 'asciidoc-face-footnote)
+    ;; Monospace
+    (,asciidoc--regexp-monospace-unconstrained
+     (1 'asciidoc-face-attribute-list)
      (2 'asciidoc-face-separator-punctuation)
-     (3 'asciidoc-face-id)
-     (4 'asciidoc-face-bracket)
-     (5 'asciidoc-face-footnote-text)
-     (6 'asciidoc-face-bracket))
+     (3 'asciidoc-face-inline-code)
+     (4 'asciidoc-face-separator-punctuation))
+
+    (,asciidoc--regexp-monospace-constrained
+     (1 'asciidoc-face-attribute-list)
+     (2 'asciidoc-face-separator-punctuation)
+     (3 'asciidoc-face-inline-code)
+     (4 'asciidoc-face-separator-punctuation))
+
+    ;; ;; footnote:id[Text]
+    ;; ;; │       ││ ││   └─ 6
+    ;; ;; │       ││ │└───── 5
+    ;; ;; │       ││ └────── 4
+    ;; ;; │       │└──────── 3
+    ;; ;; │       └───────── 2
+    ;; ;; └───────────────── 1
+    ;; (,asciidoc--regexp-footnote
+    ;;  (1 'asciidoc-face-footnote)
+    ;;  (2 'asciidoc-face-separator-punctuation)
+    ;;  (3 'asciidoc-face-id)
+    ;;  (4 'asciidoc-face-bracket)
+    ;;  (5 'asciidoc-face-footnote-text)
+    ;;  (6 'asciidoc-face-bracket))
 
     ;; kbd:[Text]
     ;;  │ ││ │  └─ 5
@@ -745,12 +826,16 @@ The hook for `text-mode' is run before this one."
      (2 'asciidoc-face-attribute-list)
      (3 'asciidoc-face-unquoted-string))
 
-    ;; Bullet list
+    ;; Unordered list
     ;; - list item
     ;; * list item
     ;; • list item
-    (,asciidoc--regexp-list-bullet
-     (1 'asciidoc-face-separator-punctuation))
+    (,asciidoc--regexp-list-unordered
+     (1 'asciidoc-face-bullet-list-markup))
+
+    ;; Ordered list
+    (,asciidoc--regexp-list-ordered
+     (1 'asciidoc-face-bullet-list-markup))
     ) "Default font lock for keywords.")
 
 (defun asciidoc-font-lock-mark-block-function ()
@@ -776,10 +861,8 @@ highlighting."
   ;; Font lock.
   (setq-local font-lock-defaults
               '(asciidoc--font-lock-keywords
-                nil
-                nil
-                nil
-                nil
+                nil nil nil nil
+                (font-lock-multiline . t)
                 (font-lock-mark-block-function . asciidoc-font-lock-mark-block-function))))
 
 

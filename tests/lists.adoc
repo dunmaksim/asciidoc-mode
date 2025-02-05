@@ -1,4 +1,4 @@
-= Lists
+* = Lists
 
 == Unordered lists
 
@@ -18,6 +18,24 @@
 • List item 4
 
 
+== Ordered list
+
+. Item
+. Item
+. Item
+.. Item
+.. Item
+.. Item
+
+1. Item
+2. Item
+3. Item
+
+I) Item
+V) Item
+X) Item
+
+
 == Nested lists
 
 * List item 1
@@ -35,3 +53,4 @@
 - [ ] Todo item
 - [*] Todo item
 - [x] Todo item
+*
