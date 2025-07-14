@@ -1,0 +1,32 @@
+[#comments]
+# Comments
+
+// Base commentary
+
+////
+Multiline commentary
+////
+
+////
+Another
+multiline
+commentary
+////
+
+[comment]
+--
+Alternate commentary sintax.
+
+Block.
+--
+
+[comment]
+Alternate syntax commentary.
+
+[comment]
+Multiline
+alternate
+syntax
+commentary.
+
+

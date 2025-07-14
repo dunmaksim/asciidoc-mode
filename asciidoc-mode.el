@@ -1,4 +1,4 @@
-;;; asciidoc-mode.el --- Major mode for AsciiDoc files -*- lexical-binding: t; -*-
+;;; asciidoc-mode.el --- Major mode for AsciiDoc markup -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024 Dunaevskii Maxim
 
@@ -94,12 +94,19 @@ The hook for `text-mode' is run before this one."
     (modify-syntax-entry ?\( "()" st)
     (modify-syntax-entry ?\) ")(" st)
     (modify-syntax-entry ?\[ "(]" st)
-    (modify-syntax-entry ?\] ")]" st)
+    (modify-syntax-entry ?\] ")[" st)
     (modify-syntax-entry ?\{ "(}" st)
     (modify-syntax-entry ?\} "){" st)
 
     st)
   "Syntax table used while in `asciidoc-mode'.")
+
+
+(defcustom asciidoc-mode-hook nil
+  "Hook run when `asciidoc-mode' is turned on.
+The hook for `text-mode' is run before this one."
+  :group 'asciidoc
+  :type '(hook))
 
 
 (defconst asciidoc--regexp-attribute-entry
@@ -366,8 +373,7 @@ The hook for `text-mode' is run before this one."
                   (zero-or-more any)))
       (group "[") ;; (\\[)
       (group (one-or-more any)) ;; content
-      (group (or "]" (seq line-start line-end)))
-      )
+      (group (or "]" (seq line-start line-end))))
   "Regexp for xref:[macro].")
 
 
@@ -855,8 +861,25 @@ and `asciidoc-mode-hook'.  This mode also support font-lock
 highlighting."
   :syntax-table asciidoc-mode-syntax-table
   :group 'asciidoc
-  (setq-local comment-start "//")
-  (setq-local indent-tabs-mode nil)
+
+  ;; Local variables
+  (setq-local
+   ;; Mode name
+   major-mode 'asciidoc-mode
+   mode-name "AsciiDoc"
+
+   ;; Indentation
+   indent-tabs-mode nil
+   indent-line-function nil
+
+   ;; Comments
+   comment-start "//"
+   comment-end ""
+   comment-start-skip (rx line-start
+                          "//"
+                          (one-or-more space)
+                          (zero-or-more any)))
+
 
   ;; Font lock.
   (setq-local font-lock-defaults
