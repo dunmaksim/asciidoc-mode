@@ -200,7 +200,7 @@
 (defvar asciidoc-face-kbd 'asciidoc-face-kbd "Face name for kbd macros name.")
 
 
-(defface asciidoc-face-kbd-text '((t (:inherit warning)))
+(defface asciidoc-face-kbd-text '((t (:inherit success)))
   "Face for :kbd:[Text] text."
   :group 'asciidoc-faces)
 (defvar asciidoc-face-kbd-text 'asciidoc-face-kbd-text)

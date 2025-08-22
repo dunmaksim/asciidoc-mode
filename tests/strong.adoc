@@ -7,3 +7,7 @@
 *constrained strong text*
 
 [attribute]*constrained strong text*
+
+Simple **strong** text in the buffer.
+
+Simple *strong* test in the buffer.

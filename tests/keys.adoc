@@ -1,0 +1,11 @@
+= Клавиши
+
+kbd:[X]
+
+kbd:[Backspace]
+
+kbd:[C-x]
+
+kbd:[C-x C-c]
+
+Нажмите kbd:[C-x], а затем kbd:[C-c].

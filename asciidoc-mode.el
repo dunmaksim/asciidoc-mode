@@ -84,6 +84,7 @@ The hook for `text-mode' is run before this one."
     (modify-syntax-entry ?` "." st)
     (modify-syntax-entry ?« "." st)
     (modify-syntax-entry ?» "." st)
+    (modify-syntax-entry ?: "." st)
 
     ;; Words and symbols delimiters
     (modify-syntax-entry ?_ "_" st)
@@ -97,6 +98,8 @@ The hook for `text-mode' is run before this one."
     (modify-syntax-entry ?\] ")[" st)
     (modify-syntax-entry ?\{ "(}" st)
     (modify-syntax-entry ?\} "){" st)
+    (modify-syntax-entry ?\< "(>" st)
+    (modify-syntax-entry ?\> ")<" st)
 
     st)
   "Syntax table used while in `asciidoc-mode'.")
@@ -280,9 +283,9 @@ The hook for `text-mode' is run before this one."
   ;; (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))
   ;; TODO: CHECK!!!
   (rx (repeat 0 "\\\\")                          ;;  (?<!\\\\\\\\)
-      (group (zero-or-more (seq "[" (one-or-more any) "]"))) ;; (\\[.+?\\])?
+      (group (*? (seq "[" (one-or-more any) "]"))) ;; (\\[.+?\\])?
       (group "**")                                           ;; \\*\\*
-      (group (one-or-more any)) ;; (.+?)
+      (group (*? any)) ;; (.+?)
       (group "**"))             ;; (\\*\\*)
   "Regexp for unconstrained bold text.")
 
@@ -296,13 +299,13 @@ The hook for `text-mode' is run before this one."
        (zero-or-more
         (seq
          "["
-         (one-or-more any)
+         (+? any) ;; non-greedy
          "]")))
       (group "*") ;; (\\*)
       (group (or ;;
               (not space)
               (seq (not space)
-                   (zero-or-more any)
+                   (*? any) ;; non-greedy
                    (not space))))
       (group "*")
       (repeat 0 word))
@@ -321,7 +324,7 @@ The hook for `text-mode' is run before this one."
       (group              ;; [.+?]
        (zero-or-more
         (seq "["
-             (one-or-more any)
+             (+? any)
              "]")))
       (group "~")
       (group (one-or-more (not space)))
@@ -341,7 +344,7 @@ The hook for `text-mode' is run before this one."
       (group
        (zero-or-more
         (seq "["
-             (one-or-more any)
+             (+? any)
              "]")))
       (group "^")
       (group (one-or-more (not space)))
@@ -356,8 +359,8 @@ The hook for `text-mode' is run before this one."
   ;; TODO: check
   (rx (repeat 0 "\\")
       (group "<<")
-      (group (one-or-more (in word """" ":" "." "/")))
-      (group (zero-or-more any))
+      (group (+? (in word """" ":" "." "/")))
+      (group (*? any))
       (group ">>"))
   "Regexp for <<xref>> macro.")
 
@@ -369,10 +372,10 @@ The hook for `text-mode' is run before this one."
   ;; TODO: check
   (rx (repeat 0 "\\")
       (group "xref:")
-      (group (seq (one-or-more (in word """" "." "\\" "/"))
+      (group (seq (+? (in word """" "." "\\" "/"))
                   (zero-or-more any)))
       (group "[") ;; (\\[)
-      (group (one-or-more any)) ;; content
+      (group (*? any)) ;; content
       (group (or "]" (seq line-start line-end))))
   "Regexp for xref:[macro].")
 
@@ -403,11 +406,11 @@ The hook for `text-mode' is run before this one."
   ;; TODO: check regexp
   (rx (repeat 0 "\\\\")
       (group (zero-or-more (seq "["
-                                (one-or-more any)
+                                (*? any) ;; non greedy
                                 "]")))
-      (group (repeat 2 ?`))
-      (group (one-or-more any))
-      (group (repeat 2 ?`)))
+      (group "``")
+      (group (*? any))
+      (group "``" ))
   "Regexp for unconstrained inline code block.")
 
 
@@ -424,12 +427,12 @@ The hook for `text-mode' is run before this one."
                     "'"
                     "`"))
       (group (zero-or-more (seq "]"
-                                (one-or-more any)
+                                (*? any) ;; non greedy
                                 "]")))
       (group ?`)
       (group (or (not space)
                  (seq (not space)
-                      (zero-or-more any)
+                      (*? any) ;; non greedy
                       (not space))))
       (group ?`)
       (repeat 0 (in word
@@ -462,12 +465,16 @@ The hook for `text-mode' is run before this one."
 
 
 (defconst asciidoc--regexp-kbd
+  ;; Regexp from AsciiDoc for VS Code:
+  ;; (?<!\\\\)(kbd|btn):(\\[)((?:\\\\\\]|[^\\]])+?)(\\])
+  ;; 
   ;; kbd:[C-c C-v]
-  (rx (group "kbd")
-      (group ?:)
-      (group "[")
-      (group (one-or-more any))
-      (group "]"))
+  (rx (repeat 0 "\\")
+      (group (or "kbd" "btn")) ;; kbd | btn
+      ":"
+      (group "[") ;; (\\[)
+      (group (+? (or "\\]" (not "]"))))
+      (group "]")) ;; (\\])
   "Regexp for kbd macros.")
 
 
@@ -643,15 +650,15 @@ The hook for `text-mode' is run before this one."
      (3 'asciidoc-face-symbol-other-constant)
      (4 'asciidoc-face-inline))
 
-    ;; - [ ] Todo
-    ;; * [ ] Todo
-    ;; - [x] Todo
-    ;; * [x] Todo
-    ;; - [*] Todo
-    ;; * [*] Todo
-    (,asciidoc--regexp-todo-markup
-     (1 'asciidoc-face-bullet-list-markup)
-     (2 'asciidoc-face-box-todo-markup))
+    ;; ;; - [ ] Todo
+    ;; ;; * [ ] Todo
+    ;; ;; - [x] Todo
+    ;; ;; * [x] Todo
+    ;; ;; - [*] Todo
+    ;; ;; * [*] Todo
+    ;; (,asciidoc--regexp-todo-markup
+    ;;  (1 'asciidoc-face-bullet-list-markup)
+    ;;  (2 'asciidoc-face-box-todo-markup))
 
 
     ;; Headers
@@ -733,10 +740,9 @@ The hook for `text-mode' is run before this one."
     ;;  └───────── 1
     (,asciidoc--regexp-kbd
      (1 'asciidoc-face-kbd)
-     (2 'asciidoc-face-separator-punctuation)
-     (3 'asciidoc-face-bracket)
-     (4 'asciidoc-face-kbd-text)
-     (5 'asciidoc-face-bracket))
+     (2 'asciidoc-face-bracket)
+     (3 'asciidoc-face-kbd-text)
+     (4 'asciidoc-face-bracket))
 
     ;; menu:File[]
     ;; menu:File[Save > Save as])
