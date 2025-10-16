@@ -32,7 +32,7 @@ include::more-file.adoc[]
 name::value[text]
 
 // Блочный макрос с пустым текстом:
-name::value[]
+name::value[Additional value]
 
 ////
 Блочный комментарий

@@ -1,0 +1,11 @@
+[#include]
+= Include directive
+
+Regexp from a VS Code Plugin:
+
+[source, javascript]
+----
+
+----
+
+include::./path-to-file.ext[]

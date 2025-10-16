@@ -1,6 +1,10 @@
-= AsciiDoc mode
+= `asciidoc-ts-mode`
 
-`asciidoc-mode` is a GNU Emacs major mode for https://docs.asciidoctor.org/[AsciiDoc] syntax support.
+`asciidoc-ts-mode` is a GNU Emacs major mode for https://docs.asciidoctor.org/[AsciiDoc] syntax support powered by TreeSitter.
+
+== Prerequirements
+
+
 
 == Installation
 

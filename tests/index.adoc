@@ -1,3 +1,14 @@
+= Header 0
+:prefix: Value
+
+== Header 1
+
+=== Header 2
+
+==== Header 3
+
+===== Header 4
+
 include::more-file.adoc[]
 
 // Комментарий
@@ -107,3 +118,15 @@ WARNING: Предупреждение
 
 Описание::
 Текст описания
+
+
+
+* List item
+
+* List item
+
+* List item
+
+. Ordered list item
+
+. Ordered list item

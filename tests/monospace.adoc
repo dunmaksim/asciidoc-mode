@@ -1,4 +1,4 @@
-# Monospace Font Lock
+= Monospace Font Lock
 
 Unconstrained ``monospace`` text.
 
