@@ -43,8 +43,6 @@
 
 (defvar asciidoc-ts-mode--syntax-table
   (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?\( "." table)
-    (modify-syntax-entry ?\( "." table)
     (modify-syntax-entry ?\' "\"" table)
     (modify-syntax-entry ?\" "\"" table)
     table)
@@ -54,40 +52,77 @@
   (treesit-font-lock-rules
    ;; Titles
    :language 'asciidoc
-   :feature 'heading
+   :feature 'title
    :override t
-   '([
-      ((block_macro (target) @font-lock-builtin-face))
+   '([(document_title)
+      (title1)
+      (title2)
+      (title3)
+      (title4)] @font-lock-keyword-face)
+
+   ;; Macro
+   :language 'asciidoc
+   :feature 'macro
+   '([((block_macro (target) @font-lock-builtin-face))
       ((block_macro_attr) @font-lock-string-face)
       ((block_macro_name) @font-lock-constant-face)
       ((block_title (line)) @font-lock-doc-face)
-      ((document_title) @font-lock-keyword-face)
       ((document_attr (attr_name)) @font-lock-builtin-face)
-      ((open_block_marker) @font-lock-delimiter-face)
-      ((ordered_list_marker (list_marker_dot)) @success)
-      ((ordered_list_marker (list_marker_digit)) @success)
-      ((unordered_list_marker (list_marker_star)) @success)
-      ((unordered_list_marker (list_marker_hyphen)) @success)
-      ((title1) @font-lock-keyword-face)
-      ((title2) @font-lock-keyword-face)
-      ((title3) @font-lock-keyword-face)
-      ((title4) @font-lock-keyword-face)
-      ])
+      ((open_block_marker) @success)])
+
+   :language 'asciidoc
+   :feature 'lists
+   '(([((ordered_list_marker (list_marker_dot)))
+       ((ordered_list_marker (list_marker_digit)))
+       ((unordered_list_marker (list_marker_star)))
+       ((unordered_list_marker (list_marker_hyphen)))
+       ] @font-lock-keyword-face))
 
    :language 'asciidoc
    :feature 'comment
    :override t
-   '(((line_comment) @font-lock-comment-face)
-     ((block_comment) @font-lock-comment-face))
+   '([(block_comment)
+      (line_comment)] @font-lock-comment-face)
 
    :language 'asciidoc-inline
-   :feature 'delimiter
-   '(["[" "]" "{" "}" "(" ")"] @font-lock-bracket-face)
+   :feature 'macro-inline
+   '(([
+       ((macro_name) @font-lock-constant-face)
+       ((inline_macro (attr)) @font-lock-string-face)]))
+
+   ;; Markup
+   :language 'asciidoc-inline
+   :feature 'markup
+   :override t
+   '(((emphasis ("**")) @bold)
+     ((emphasis ("*")) @bold)
+     ((ltalic ("_")) @italic)
+     ((ltalic ("__")) @italic)
+     ((monospace ("`")) @font-lock-constant-face)
+     ((monospace ("``")) @font-lock-constant-face))
+
+   :language 'asciidoc
+   :feature 'error
+   :override t
+   '([(ERROR)
+      (MISSING)] @font-lock-warning-face)
    )
   "Tree-sitter font-lock settings for `asciidoc-ts-mode'.")
 
+(defun asciidoc-ts-imenu-node-p (node)
+  "Check if NODE is a valid entry to imenu."
+  (equal (treesit-node-type (treesit-node-parent node))
+         "document_title"))
+
+(defun asciidoc-ts-imenu-name-function (node)
+  "Return an imenu entry if NODE is a valid header."
+  (let ((name (treesit-node-text node)))
+    (if (asciidoc-ts-imenu-node-p node)
+        (thread-first (treesit-node-parent node)(treesit-node-text))
+      name)))
+
 ;;;###autoload
-(define-derived-mode asciidoc-ts-mode text-mode "🌳 ASCIIDOC"
+(define-derived-mode asciidoc-ts-mode text-mode "AsciiDoc[TS]"
   "Major mode for editing AsciiDoc, powered by tree-sitter."
   :group 'asciidoc
   :syntax-table asciidoc-ts-mode--syntax-table
@@ -96,8 +131,8 @@
          (treesit-ready-p 'asciidoc)
          (treesit-ready-p 'asciidoc-inline))
     (progn
-      (treesit-parser-create 'asciidoc-inline)
       (treesit-parser-create 'asciidoc)
+      (treesit-parser-create 'asciidoc-inline)
 
       ;; Comments.
       (setq-local comment-start "// ")
@@ -106,13 +141,22 @@
       ;; Indentation
       (setq-local indent-tabs-mode nil)
 
+      ;; IMenu
+      (setq-local treesit-simple-imenu-settings
+                  `(("Headings" asciidoc-ts-imenu-node-p nil asciidoc-ts-imenu-name-function)))
+
       ;; Font-lock.
-      (setq-local treesit-font-lock-level 4) ;; All features
+      (setq-local treesit-font-lock-level 3) ;; All features
       (setq-local treesit-font-lock-settings asciidoc-ts-mode--font-lock-settings)
       (setq-local treesit-font-lock-feature-list
-                  '((delimiter)
-                    (comment)
-                    (heading)))
+                  '(;; Level 1
+                    (title macro lists comment)
+                    ;; Level 2
+                    (paragraph-inline macro-inline markup)
+                    ;; Level 3
+                    ()
+                    ;; Level 4
+                    (error)))
 
       (treesit-major-mode-setup))))
 
