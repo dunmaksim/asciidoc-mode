@@ -48,27 +48,34 @@
     table)
   "Syntax table for `asciidoc-ts-mode'.")
 
+(defvar h0-line-query)
+(setq h0-line-query '(document_title (title_h0_marker) (line)))
+
 (defvar asciidoc-ts-mode--font-lock-settings
   (treesit-font-lock-rules
    ;; Titles
    :language 'asciidoc
    :feature 'title
    :override t
-   '([(document_title)
-      (title1)
-      (title2)
-      (title3)
-      (title4)] @font-lock-keyword-face)
+   '([((document_title) @success)
+      ((title1) @warning)
+      ((title2) @warning)
+      ((title3) @warning)
+      ((title4) @error)
+      ((title5) @error)])
 
    ;; Macro
    :language 'asciidoc
    :feature 'macro
-   '([((block_macro (target) @font-lock-builtin-face))
-      ((block_macro_attr) @font-lock-string-face)
+   :override t
+   '([((block_macro_attr) @font-lock-string-face)
       ((block_macro_name) @font-lock-constant-face)
       ((block_title (line)) @font-lock-doc-face)
       ((document_attr (attr_name)) @font-lock-builtin-face)
-      ((open_block_marker) @success)])
+      ((document_attr (line)) @font-lock-string-face)
+      ((open_block_marker) @success)
+      ((admonition) @success)
+      ((listing_block) @fixed-pitch)])
 
    :language 'asciidoc
    :feature 'lists
@@ -88,7 +95,8 @@
    :feature 'macro-inline
    '(([
        ((macro_name) @font-lock-constant-face)
-       ((inline_macro (attr)) @font-lock-string-face)]))
+       ((inline_macro (attr)) @font-lock-string-face)
+       ]))
 
    ;; Markup
    :language 'asciidoc-inline
@@ -128,11 +136,11 @@
   :syntax-table asciidoc-ts-mode--syntax-table
 
   (when (and
-         (treesit-ready-p 'asciidoc)
-         (treesit-ready-p 'asciidoc-inline))
+         (treesit-ready-p 'asciidoc-inline)
+         (treesit-ready-p 'asciidoc))
     (progn
-      (treesit-parser-create 'asciidoc)
       (treesit-parser-create 'asciidoc-inline)
+      (treesit-parser-create 'asciidoc)
 
       ;; Comments.
       (setq-local comment-start "// ")
@@ -150,9 +158,9 @@
       (setq-local treesit-font-lock-settings asciidoc-ts-mode--font-lock-settings)
       (setq-local treesit-font-lock-feature-list
                   '(;; Level 1
-                    (title macro lists comment)
+                    (title lists comment)
                     ;; Level 2
-                    (paragraph-inline macro-inline markup)
+                    (macro paragraph-inline macro-inline markup)
                     ;; Level 3
                     ()
                     ;; Level 4

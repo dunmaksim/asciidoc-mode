@@ -1,13 +1,13 @@
-# Scripts
+= Scripts
 
-## Subscript
+== Subscript
 
 H~2~O
 
 Subsscript with [.property]H~2~O.
 
 
-## Superscript
+== Superscript
 
 E = mc^2^
 

@@ -1,6 +1,8 @@
+[#document-id]
 = Header 0
 :prefix: Value
 
+[#header1-id]
 == Header 1
 
 === Header 2
@@ -8,6 +10,8 @@
 ==== Header 3
 
 ===== Header 4
+
+====== Header 5
 
 include::more-file.adoc[]
 
@@ -56,41 +60,6 @@ name::value[]
 
 // Встроенный макрос с пустым текстом
 Текст name:value[].
-
-NOTE: Примечание
-
-[NOTE]
-====
-Заметка
-====
-
-TIP: Подсказка
-
-[TIP]
-====
-Совет
-====
-
-IMPORTANT: Важно
-
-[IMPORTANT]
-====
-Важно
-====
-
-CAUTION: Предупреждение
-
-[CAUTION]
-====
-Предупреждение
-====
-
-WARNING: Предупреждение
-
-[WARNING]
-====
-Предупреждение
-====
 
 
 == Разделители
