@@ -226,6 +226,8 @@ Typical btn:[Open], and this regexp capture 2 groups:
 ;;; SYNTAX TABLE
 (defvar asciidoc-mode-syntax-table
   (let ((st (make-syntax-table)))
+    (modify-syntax-entry ?\" "."  st) ; Prevent highlighting string in quotes
+    (modify-syntax-entry ?\' "."  st) ; Prevent highlighting string in quotes
     (modify-syntax-entry ?\{ "(}" st)
     (modify-syntax-entry ?\} "){" st)
     (modify-syntax-entry ?\( "()" st)
@@ -244,8 +246,8 @@ Typical btn:[Open], and this regexp capture 2 groups:
 
   (font-lock-mode t)
 
-  (setq-local font-lock-defaults '(asciidoc-mode-font-lock-keywords))
   (setq-local comment-start "//")
+  (setq-local font-lock-defaults '(asciidoc-mode-font-lock-keywords))
   (setq-local font-lock-multiline t)
   (setq-local indent-tabs-mode nil)
   (setq-local parse-sexp-ignore-comments t)
