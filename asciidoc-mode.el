@@ -44,8 +44,7 @@
   (rx (seq line-start
            (group "="
                   (one-or-more space)
-                  (one-or-more any)
-                  (zero-or-more space))
+                  (one-or-more not-newline))
            line-end))
   "Regexp for headers level 0.")
 
@@ -53,8 +52,7 @@
   (rx (seq line-start
            (group "=="
                   (one-or-more space)
-                  (one-or-more any)
-                  (zero-or-more space))
+                  (one-or-more not-newline))
            line-end))
   "Regexp for headers level 1.")
 
@@ -62,17 +60,15 @@
   (rx (seq line-start
            (group "==="
                   (one-or-more space)
-                  (one-or-more any)
-                  (zero-or-more space))
+                  (one-or-more not-newline))
            line-end))
   "Regexp for headers level 2.")
 
 (defconst asciidoc--header-level-3-regexp
   (rx (seq line-start
-           (group "===="
-                  (one-or-more space)
-                  (one-or-more any)
-                  (zero-or-more space))
+           (group (seq "===="
+                       (one-or-more space)
+                       (one-or-more not-newline)))
            line-end))
   "Regexp for headers level 3.")
 
@@ -80,8 +76,7 @@
   (rx (seq line-start
            (group "====="
                   (one-or-more space)
-                  (one-or-more any)
-                  (zero-or-more space))
+                  (one-or-more not-newline))
            line-end))
   "Regexp for headers level 4.")
 
@@ -89,8 +84,7 @@
   (rx (seq line-start
            (group "======"
                   (one-or-more space)
-                  (one-or-more any)
-                  (zero-or-more space))
+                  (one-or-more not-newline))
            line-end))
   "Regexp for headers level 5.")
 
@@ -248,7 +242,7 @@ Typical btn:[Open], and this regexp capture 2 groups:
 
   (setq-local comment-start "//")
   (setq-local font-lock-defaults '(asciidoc-mode-font-lock-keywords))
-  (setq-local font-lock-multiline t)
+  (setq-local font-lock-multiline nil)
   (setq-local indent-tabs-mode nil)
   (setq-local parse-sexp-ignore-comments t)
   (setq-local require-final-newline mode-require-final-newline))
