@@ -95,6 +95,32 @@
   "Regexp for headers level 5.")
 
 
+(defconst asciidoc--kbd-regexp
+  (rx (seq (group "kbd")
+           ":"
+           "["
+           (group (one-or-more (not "]")))
+           "]"))
+  "Regexp for kbd macro.
+
+Typical kbd:[Ctrl+Alt], and this regexp capture 2 groups:
+1. kbd
+2. Ctrl+Alt")
+
+
+(defconst asciidoc--btn-regexp
+  (rx (seq (group "btn")
+           ":"
+           "["
+           (group (one-or-more (not "]")))
+           "]"))
+  "Regexp for btn macro.
+
+Typical btn:[Open], and this regexp capture 2 groups:
+1. btn
+2. Open")
+
+
 ;;; FACES
 (defgroup asciidoc nil
   "Major mode for edition AsciiDoc files."
@@ -156,6 +182,22 @@
 (defvar asciidoc-header-level-5-face 'asciidoc-header-level-5-face)
 
 
+(defface asciidoc-macro-name-face '((t :inherit font-lock-keyword-face))
+  "Face for macro names."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-macro-name-face 'asciidoc-macro-name-face)
+
+
+(defface asciidoc-macro-attributes-face '((t :inherit font-lock-string-face))
+  "Face for macro attributes."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-macro-attributes-face 'asciidoc-macro-attributes-face)
+
+
 (defface asciidoc-comment-face '((t :inherit font-lock-comment-face))
   "Face for comments."
   :version "30.1"
@@ -172,7 +214,13 @@
     (,asciidoc--header-level-2-regexp . asciidoc-header-level-2-face)
     (,asciidoc--header-level-3-regexp . asciidoc-header-level-3-face)
     (,asciidoc--header-level-4-regexp . asciidoc-header-level-4-face)
-    (,asciidoc--header-level-5-regexp . asciidoc-header-level-5-face)))
+    (,asciidoc--header-level-5-regexp . asciidoc-header-level-5-face)
+    ;; kbd
+    (,asciidoc--kbd-regexp . ((1 asciidoc-macro-name-face)
+                              (2 asciidoc-macro-attributes-face)))
+    ;; btn
+    (,asciidoc--btn-regexp .((1 asciidoc-macro-name-face)
+                             (2 asciidoc-macro-attributes-face)))))
 
 
 ;;; SYNTAX TABLE
