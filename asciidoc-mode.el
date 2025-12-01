@@ -41,52 +41,70 @@
 
 ;;; REGEXP
 (defconst asciidoc--header-level-0-regexp
-  (rx (seq line-start
-           (group "="
-                  (one-or-more space)
-                  (one-or-more not-newline))
-           line-end))
-  "Regexp for headers level 0.")
+  (rx line-start
+      (group (or "=" "#")
+             (one-or-more blank)
+             (one-or-more not-newline))
+      line-end)
+  "Regexp for headers level 0.
+
+= Header level 0
+# Header level 0")
 
 (defconst asciidoc--header-level-1-regexp
-  (rx (seq line-start
-           (group "=="
-                  (one-or-more space)
-                  (one-or-more not-newline))
-           line-end))
-  "Regexp for headers level 1.")
+  (rx line-start
+      (group (repeat 2 (or "=" "#"))
+             (one-or-more blank)
+             (one-or-more not-newline)
+             line-end))
+  "Regexp for headers level 1.
+
+== Header level 1
+## Header level 1")
 
 (defconst asciidoc--header-level-2-regexp
-  (rx (seq line-start
-           (group "==="
-                  (one-or-more space)
-                  (one-or-more not-newline))
-           line-end))
-  "Regexp for headers level 2.")
+  (rx line-start
+      (group (repeat 3 (or "=" "#"))
+             (one-or-more blank)
+             (one-or-more not-newline)
+             line-end))
+  "Regexp for headers level 2.
+
+=== Header level 2
+### Header level 2")
 
 (defconst asciidoc--header-level-3-regexp
-  (rx (seq line-start
-           (group (seq "===="
-                       (one-or-more space)
-                       (one-or-more not-newline)))
-           line-end))
-  "Regexp for headers level 3.")
+  (rx line-start
+      (group (repeat 4 (or "=" "#"))
+             (one-or-more blank)
+             (one-or-more not-newline)
+             line-end))
+  "Regexp for headers level 3.
+
+==== Header level 3
+#### Header level 3")
 
 (defconst asciidoc--header-level-4-regexp
-  (rx (seq line-start
-           (group "====="
-                  (one-or-more space)
-                  (one-or-more not-newline))
-           line-end))
-  "Regexp for headers level 4.")
+  (rx line-start
+      (group (repeat 5 (or "=" "#"))
+             (one-or-more blank)
+             (one-or-more not-newline)
+             line-end))
+  "Regexp for headers level 4.
+
+===== Header level 4
+##### Header level 4")
 
 (defconst asciidoc--header-level-5-regexp
-  (rx (seq line-start
-           (group "======"
-                  (one-or-more space)
-                  (one-or-more not-newline))
-           line-end))
-  "Regexp for headers level 5.")
+  (rx line-start
+      (group (repeat 6 (or "=" "#"))
+             (one-or-more blank)
+             (one-or-more not-newline)
+             line-end))
+  "Regexp for headers level 5.
+
+====== Header level 5
+###### Header level 5")
 
 
 (defconst asciidoc--kbd-regexp
@@ -198,6 +216,54 @@ Typical btn:[Open], and this regexp capture 2 groups:
   :group 'asciidoc-faces)
 
 (defvar asciidoc-comment-face 'asciidoc-comment-face)
+
+
+;; Admonitions:
+;;
+;; NOTE
+;; TIP
+;; IMPORTANT
+;; WARNING
+;; CAUTION
+
+(defface asciidoc-note-header-face '((t :inherit font-lock-constant-face))
+  "Face for NOTE keyword."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-note-header-face 'asciidoc-note-header-face)
+
+
+(defface asciidoc-tip-header-face '((t :inherit success))
+  "Face for TIP keyword."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-tip-header-face 'asciidoc-tip-header-face)
+
+
+(defface asciidoc-important-header-face '((t :inherit warning))
+  "Face for IMPORTANT keyword."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-important-header-face 'asciidoc-important-header-face)
+
+
+(defface asciidoc-warning-header-face '((t :inherit warning))
+  "Face for WARNING keyword."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-warning-header-face 'asciidoc-warning-header-face)
+
+
+(defface asciidoc-caution-header-face '((t :inherit error))
+  "Face for CAUTION keyword."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-caution-header-face 'asciidoc-caution-header-face)
 
 
 (defvar asciidoc-mode-font-lock-keywords

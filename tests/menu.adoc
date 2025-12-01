@@ -1,3 +1,11 @@
+Меню в тексте: menu:Copy[].
+
+И ещё в тексте: menu:File[Open].
+
+Сложное меню: menu:File[Open > As binary], после этого текст.
+
 menu:File[]
 
 menu:File[Save as > PDF]
+
+Экранированное меню: \\menu:File[Open]

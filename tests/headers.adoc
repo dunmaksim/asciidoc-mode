@@ -21,3 +21,8 @@
 ====== Header level 5
 
 ###### Header level 5
+
+[NOTE]
+====
+Не заголовок!
+====
