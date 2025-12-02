@@ -184,6 +184,34 @@ __I am italic__
 VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 
 
+(defconst asciidoc--monospace-unconstrained-regexp
+  (rx (not "\\")
+      (group (zero-or-more "["
+                           (minimal-match any)
+                           "]"))
+      (group "\`\`"
+             (minimal-match (one-or-more any))
+             "\`\`"))
+  "RegExp for unconstrained \`\`monospace\`\` text.
+VS Code AsciiDoc: (?<!\\\\)(\\[.+?\\])?((``)(.+?)(``))")
+
+
+(defconst asciidoc--monospace-constrained-regexp
+  (rx (not (in "\\" ";" ":" word "'" "\`"))
+      (group (zero-or-more "["
+                           (minimal-match (one-or-more any))
+                           "]"))
+      (group "\`"
+             (or (not space)
+                 (seq (not space)
+                      (minimal-match (zero-or-more any))
+                      (not space)))
+             "\`")
+      (not (in word "\\" "'" "\`")))
+  "RegExp for constrained \`monospace`\ text.
+VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(?![\\p{Word}\"'`])")
+
+
 
 ;;; FACES
 (defgroup asciidoc nil
@@ -254,7 +282,7 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 (defvar asciidoc-macro-name-face 'asciidoc-macro-name-face)
 
 
-(defface asciidoc-macro-attributes-face '((t :inherit font-lock-string-face))
+(defface asciidoc-macro-attributes-face '((t :inherit font-lock-keyword-face))
   "Face for macro attributes."
   :version "30.1"
   :group 'asciidoc-faces)
@@ -334,6 +362,15 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 (defvar asciidoc-emphasis-face 'asciidoc-emphasis-face)
 
 
+(defface asciidoc-monospace-face '((t :inherit (font-lock-string-face
+                                                fixed-pitch)))
+  "Face for monospace text."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-monospace-face 'asciidoc-monospace-face)
+
+
 ;; KEYWORDS
 (defvar asciidoc-mode-font-lock-keywords
   `(;; Headers
@@ -355,8 +392,14 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
     (,asciidoc--strong-constrained-regexp . ((1 asciidoc-macro-attributes-face)
                                              (2 asciidoc-strong-face)))
     ;; emphasis / italic
-    (,asciidoc--emphasis-unconstrained-regexp .((1 asciidoc-macro-attributes-face)
-                                                (2 asciidoc-emphasis-face)))))
+    (,asciidoc--emphasis-unconstrained-regexp . ((1 asciidoc-macro-attributes-face)
+                                                 (2 asciidoc-emphasis-face)))
+    ;; monospace
+    (,asciidoc--monospace-unconstrained-regexp . ((1 asciidoc-macro-attributes-face)
+                                                  (2 asciidoc-monospace-face)))
+    (,asciidoc--monospace-constrained-regexp . ((1 asciidoc-macro-attributes-face)
+                                                (2 asciidoc-monospace-face)))))
+
 
 
 ;;; SYNTAX TABLE
