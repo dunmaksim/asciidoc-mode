@@ -12,7 +12,7 @@ Simple **strong** text in the buffer.
 
 Simple *strong* test in the buffer.
 
-\\\\**Commentary**
+\**Commentary**
 
 * List item
 

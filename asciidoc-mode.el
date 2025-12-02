@@ -127,25 +127,42 @@ Typical kbd:[Ctrl+Alt], and this regexp capture 2 groups:
       (group (one-or-more (not "]")))
       "]")
   "Regexp for btn macro.
-
 Typical btn:[Open], and this regexp capture 2 groups:
 1. btn
 2. Open")
 
 
 (defconst asciidoc--strong-unconstrained-regexp
-  (rx (group (zero-or-more "["
+  (rx (not "\\")
+      (group (zero-or-more "["
                            (minimal-match (one-or-more any))
                            "]"))
       (group "**"
              (minimal-match (one-or-more any))
              "**"))
   "Regexp for unconstrained strong (bold) text.
-
 **I am bold**
 [class='data']**me too**
-\\\\**But me - not**
-** Me too :-)")
+\**But not me**
+** Me too
+VS Code AsciiDoc: (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))")
+
+
+(defconst asciidoc--emphasis-unconstrained-regexp
+  (rx (not "\\")
+      (group (zero-or-more "["
+                           (minimal-match (not "\\"))
+                           "]"))
+      (group "__"
+             (minimal-match (not "_")
+                            (one-or-more any))
+             "__"))
+  "RegExp for unconstrained emphasis (italic) text.
+__I am italic__
+[class='data']__me too__
+\__But not me__
+VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
+
 
 
 ;;; FACES
@@ -281,12 +298,20 @@ Typical btn:[Open], and this regexp capture 2 groups:
 (defvar asciidoc-caution-header-face 'asciidoc-caution-header-face)
 
 
-(defface asciidoc-bold-face '((t :inherit bold))
+(defface asciidoc-strong-face '((t :inherit bold))
   "Face for bold text."
   :version "30.1"
   :group 'asciidoc-faces)
 
-(defvar asciidoc-bold-face 'asciidoc-bold-face)
+(defvar asciidoc-strong-face 'asciidoc-strong-face)
+
+
+(defface asciidoc-emphasis-face '((t :inherit italic))
+  "Face for italic text."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-emphasis-face 'asciidoc-emphasis-face)
 
 
 ;; KEYWORDS
@@ -304,8 +329,12 @@ Typical btn:[Open], and this regexp capture 2 groups:
     ;; btn
     (,asciidoc--btn-regexp . ((1 asciidoc-macro-name-face)
                               (2 asciidoc-macro-attributes-face)))
+    ;; strong / bold
     (,asciidoc--strong-unconstrained-regexp . ((1 asciidoc-macro-attributes-face)
-                                               (2 asciidoc-bold-face)))))
+                                               (2 asciidoc-strong-face)))
+    ;; emphasis / italic
+    (,asciidoc--emphasis-unconstrained-regexp .((1 asciidoc-macro-attributes-face)
+                                                (2 asciidoc-emphasis-face)))))
 
 
 ;;; SYNTAX TABLE
