@@ -16,7 +16,7 @@ Simple *strong* test in the buffer.
 
 * List item
 
-* One more list item
+* One more *list item*
 
 ** Nested list item 1
 

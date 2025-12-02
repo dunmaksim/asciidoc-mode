@@ -140,12 +140,32 @@ Typical btn:[Open], and this regexp capture 2 groups:
       (group "**"
              (minimal-match (one-or-more any))
              "**"))
-  "Regexp for unconstrained strong (bold) text.
+  "Regexp for unconstrained **strong** (bold) text.
 **I am bold**
 [class='data']**me too**
 \**But not me**
-** Me too
+** Not me too
 VS Code AsciiDoc: (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))")
+
+
+(defconst asciidoc--strong-constrained-regexp
+  (rx (not (in "\\" ";" ":" word "*"))
+      (group (zero-or-more "["
+                           (minimal-match (one-or-more any))
+                           "]"))
+      (group "*"
+             (or (not space)
+                 (seq (not space)
+                      (minimal-match (zero-or-more any))
+                      (not space)))
+             "*")
+      (not word))
+  "RegExp for constrained *strong* (bold) text.
+*I am bold*
+[class='data']*me too*
+* Not me*
+VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
+")
 
 
 (defconst asciidoc--emphasis-unconstrained-regexp
@@ -332,6 +352,8 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
     ;; strong / bold
     (,asciidoc--strong-unconstrained-regexp . ((1 asciidoc-macro-attributes-face)
                                                (2 asciidoc-strong-face)))
+    (,asciidoc--strong-constrained-regexp . ((1 asciidoc-macro-attributes-face)
+                                             (2 asciidoc-strong-face)))
     ;; emphasis / italic
     (,asciidoc--emphasis-unconstrained-regexp .((1 asciidoc-macro-attributes-face)
                                                 (2 asciidoc-emphasis-face)))))
