@@ -108,11 +108,11 @@
 
 
 (defconst asciidoc--kbd-regexp
-  (rx (seq (group "kbd")
-           ":"
-           "["
-           (group (one-or-more (not "]")))
-           "]"))
+  (rx (group "kbd")
+      ":"
+      "["
+      (group (one-or-more (not "]")))
+      "]")
   "Regexp for kbd macro.
 
 Typical kbd:[Ctrl+Alt], and this regexp capture 2 groups:
@@ -121,16 +121,31 @@ Typical kbd:[Ctrl+Alt], and this regexp capture 2 groups:
 
 
 (defconst asciidoc--btn-regexp
-  (rx (seq (group "btn")
-           ":"
-           "["
-           (group (one-or-more (not "]")))
-           "]"))
+  (rx (group "btn")
+      ":"
+      "["
+      (group (one-or-more (not "]")))
+      "]")
   "Regexp for btn macro.
 
 Typical btn:[Open], and this regexp capture 2 groups:
 1. btn
 2. Open")
+
+
+(defconst asciidoc--strong-unconstrained-regexp
+  (rx (group (zero-or-more "["
+                           (minimal-match (one-or-more any))
+                           "]"))
+      (group "**"
+             (minimal-match (one-or-more any))
+             "**"))
+  "Regexp for unconstrained strong (bold) text.
+
+**I am bold**
+[class='data']**me too**
+\\\\**But me - not**
+** Me too :-)")
 
 
 ;;; FACES
@@ -266,9 +281,17 @@ Typical btn:[Open], and this regexp capture 2 groups:
 (defvar asciidoc-caution-header-face 'asciidoc-caution-header-face)
 
 
+(defface asciidoc-bold-face '((t :inherit bold))
+  "Face for bold text."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-bold-face 'asciidoc-bold-face)
+
+
+;; KEYWORDS
 (defvar asciidoc-mode-font-lock-keywords
-  `(
-    ;; Headers
+  `(;; Headers
     (,asciidoc--header-level-0-regexp . asciidoc-header-level-0-face)
     (,asciidoc--header-level-1-regexp . asciidoc-header-level-1-face)
     (,asciidoc--header-level-2-regexp . asciidoc-header-level-2-face)
@@ -279,8 +302,10 @@ Typical btn:[Open], and this regexp capture 2 groups:
     (,asciidoc--kbd-regexp . ((1 asciidoc-macro-name-face)
                               (2 asciidoc-macro-attributes-face)))
     ;; btn
-    (,asciidoc--btn-regexp .((1 asciidoc-macro-name-face)
-                             (2 asciidoc-macro-attributes-face)))))
+    (,asciidoc--btn-regexp . ((1 asciidoc-macro-name-face)
+                              (2 asciidoc-macro-attributes-face)))
+    (,asciidoc--strong-unconstrained-regexp . ((1 asciidoc-macro-attributes-face)
+                                               (2 asciidoc-bold-face)))))
 
 
 ;;; SYNTAX TABLE
@@ -294,6 +319,7 @@ Typical btn:[Open], and this regexp capture 2 groups:
     (modify-syntax-entry ?\) ")(" st)
     (modify-syntax-entry ?\[ "(]" st)
     (modify-syntax-entry ?\] ")[" st)
+    (modify-syntax-entry ?\\ "\\" st) ; Mark backslash as escape character
     st))
 
 
