@@ -183,34 +183,6 @@ __I am italic__
 \__But not me__
 VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 
-;; TODO
-;; (defconst asciidoc--emphasis-constrained-regexp
-;;   ;; RegExp from VS Code: (?!_{4,}\\s*$)(?<=^|[^\\p{Word};:])(\\[(?:[^\\]]+?)\\])?((_)(\\S|\\S.*?\\S)(_))(?!\\p{Word})
-;;   (rx
-;;    ;; TODO: (?!_{4,}\\s*$)
-;;    (or ;; (?<=^|[^\\p{Word};:])
-;;     line-start
-;;     (not (in word ";" ":")))
-
-
-;;    (seq "[" ;; (\\[(?:[^\\]]+?)\\])?
-;;         (minimal-match (not "]"))
-;;         "]")
-
-;;    (group "_" ;;((_)(\\S|\\S.*?\\S)(_))
-;;           (or
-;;            (not space)
-;;            (seq (not space)
-;;                 (minimal-match (zero-or-more any))
-;;                 (not space)))
-;;           "_")
-
-;;    not-word-boundary) ;; (?!\\p{Word})
-;;   "RegExp for constrained emphasis (italic) text.
-;;   _I am italic_
-;;   [class='data']_me too_
-;;   \_But not me_")
-
 
 (defconst asciidoc--monospace-unconstrained-regexp
   (rx (not "\\")
@@ -240,23 +212,6 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(?![\\p{Word}\"'`])")
 
 
-;; FIX REGEXP
-;; (defconst asciidoc--macro-block-general
-;;   ;; ^(\\p{Word}+)(::)(\\S*?)(\\[)((?:\\\\\\]|[^\\]])*?)(\\])$
-;;   (rx line-start ;; ^
-;;       (one-or-more word) ;; (\\p{Word}+)
-;;       "::" ;; (::)
-;;       (minimal-match (not space)) ;; (\\S*?)
-;;       "[" ;; (\\[)
-;;       ;; ((?:\\\\\\]|[^\\]])*?)
-;;       (minimal-match (or "\\]"
-;;                          (not "]")))
-;;       "]" ;; (\\])
-;;       line-end)
-;;"RegExp for general macro.
-;;attribute::[values]")
-
-
 (defconst asciidoc--comment-inline-regexp
   ;; ^/{2}([^/].*)?$
   (rx line-start
@@ -268,19 +223,19 @@ VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(
 // commentary")
 
 
-;; TODO
-;; (defconst asciidoc--comment-block-regexp
-;;   (rx (minimal-match
-;;        line-start
-;;        (group "////")
-;;        (group (zero-or-more any))
-;;        (group "////")
-;;        line-end))
-;;   "RegExp for block commentary.
-;; ////
-;; Comment
-;; Comment contiue
-;; ////")
+(defconst asciidoc--include-directive-regexp
+  ;; ^(include)(::)([^\\[]+)(\\[)(.*?)(\\])$)
+  (rx line-start
+      (group "include")
+      (group "::")
+      (one-or-more (not "["))
+      (group "[")
+      (group (minimal-match (zero-or-more not-newline)))
+      (group "]")
+      line-end)
+  "RegExp for include directive.
+include::path-to-file[attributes]")
+
 
 
 ;;; FACES
@@ -441,6 +396,30 @@ VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(
 (defvar asciidoc-monospace-face 'asciidoc-monospace-face)
 
 
+(defface asciidoc-directive-face '((t :inherit (font-lock-function-name-face)))
+  "Face for directives."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-directive-face 'asciidoc-directive-face)
+
+
+(defface asciidoc-delimiter-face '((t :inherit (font-lock-delimiter-face)))
+  "Face for delimiters."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-delimiter-face 'asciidoc-delimiter-face)
+
+
+(defface asciidoc-bracket-face '((t :inherit (font-lock-bracket-face)))
+  "Face for brackets."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-bracket-face 'asciidoc-bracket-face)
+
+
 ;; KEYWORDS
 (defvar asciidoc-mode-font-lock-keywords
   `(;; Headers
@@ -469,8 +448,12 @@ VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(
                                                   (2 asciidoc-monospace-face)))
     (,asciidoc--monospace-constrained-regexp . ((1 asciidoc-macro-attributes-face)
                                                 (2 asciidoc-monospace-face)))
-    (,asciidoc--comment-inline-regexp . asciidoc-comment-face)))
-
+    (,asciidoc--comment-inline-regexp . asciidoc-comment-face)
+    (,asciidoc--include-directive-regexp . ((1 asciidoc-directive-face)
+                                            (2 asciidoc-delimiter-face)
+                                            (3 asciidoc-bracket-face)
+                                            (4 asciidoc-macro-attributes-face)
+                                            (5 asciidoc-bracket-face)))))
 
 
 ;;; SYNTAX TABLE

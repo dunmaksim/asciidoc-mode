@@ -1,4 +1,3 @@
-[#include]
 = Include directive
 
 Regexp from a VS Code Plugin:
@@ -9,3 +8,9 @@ Regexp from a VS Code Plugin:
 ----
 
 include::./path-to-file.ext[]
+
+include::[]
+
+include::path-to-file.adoc[attributes]
+
+include::image$path-to-image.svg[]
