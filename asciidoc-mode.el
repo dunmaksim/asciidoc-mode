@@ -133,6 +133,7 @@ Typical btn:[Open], and this regexp capture 2 groups:
 
 
 (defconst asciidoc--strong-unconstrained-regexp
+  ;; (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))")
   (rx (not "\\")
       (group (zero-or-more "["
                            (minimal-match (one-or-more any))
@@ -144,19 +145,18 @@ Typical btn:[Open], and this regexp capture 2 groups:
 **I am bold**
 [class='data']**me too**
 \**But not me**
-** Not me too
-VS Code AsciiDoc: (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))")
+** Not me too")
 
 
 (defconst asciidoc--strong-constrained-regexp
   (rx (not (in "\\" ";" ":" word "*"))
       (group (zero-or-more "["
-                           (minimal-match (one-or-more any))
+                           (minimal-match (one-or-more not-newline))
                            "]"))
       (group "*"
              (or (not space)
                  (seq (not space)
-                      (minimal-match (zero-or-more any))
+                      (minimal-match (zero-or-more not-newline))
                       (not space)))
              "*")
       (not word))
@@ -235,6 +235,22 @@ VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(
       line-end)
   "RegExp for include directive.
 include::path-to-file[attributes]")
+
+
+(defconst asciidoc--image-macro-regexp
+  ;; (?<!\\\\)(image|icon):([^:\\[][^\\[]*)\\[((?:\\\\\\]|[^\\]])*?)\\]
+  (rx (not "\\")
+      (group (or "image" "icon"))
+      ":"
+      (seq (not (in ":" "["))
+           (zero-or-more (not "[")))
+      (group "[")
+      (group (minimal-match (zero-or-more (or (not "\\")
+                                              (not "]")))))
+      (group "]"))
+  "RegExp for images and icons
+image:path-to-image[attributes]
+icon:path-to-icon[attributes]")
 
 
 
@@ -448,12 +464,19 @@ include::path-to-file[attributes]")
                                                   (2 asciidoc-monospace-face)))
     (,asciidoc--monospace-constrained-regexp . ((1 asciidoc-macro-attributes-face)
                                                 (2 asciidoc-monospace-face)))
+    ;; comments
     (,asciidoc--comment-inline-regexp . asciidoc-comment-face)
+    ;; includes
     (,asciidoc--include-directive-regexp . ((1 asciidoc-directive-face)
                                             (2 asciidoc-delimiter-face)
                                             (3 asciidoc-bracket-face)
                                             (4 asciidoc-macro-attributes-face)
-                                            (5 asciidoc-bracket-face)))))
+                                            (5 asciidoc-bracket-face)))
+    ;; images and icons
+    (,asciidoc--image-macro-regexp . ((1 asciidoc-directive-face)
+                                      (2 asciidoc-bracket-face)
+                                      (3 asciidoc-macro-attributes-face)
+                                      (4 asciidoc-bracket-face)))))
 
 
 ;;; SYNTAX TABLE
