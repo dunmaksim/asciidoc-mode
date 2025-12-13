@@ -183,6 +183,34 @@ __I am italic__
 \__But not me__
 VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 
+;; TODO
+;; (defconst asciidoc--emphasis-constrained-regexp
+;;   ;; RegExp from VS Code: (?!_{4,}\\s*$)(?<=^|[^\\p{Word};:])(\\[(?:[^\\]]+?)\\])?((_)(\\S|\\S.*?\\S)(_))(?!\\p{Word})
+;;   (rx
+;;    ;; TODO: (?!_{4,}\\s*$)
+;;    (or ;; (?<=^|[^\\p{Word};:])
+;;     line-start
+;;     (not (in word ";" ":")))
+
+
+;;    (seq "[" ;; (\\[(?:[^\\]]+?)\\])?
+;;         (minimal-match (not "]"))
+;;         "]")
+
+;;    (group "_" ;;((_)(\\S|\\S.*?\\S)(_))
+;;           (or
+;;            (not space)
+;;            (seq (not space)
+;;                 (minimal-match (zero-or-more any))
+;;                 (not space)))
+;;           "_")
+
+;;    not-word-boundary) ;; (?!\\p{Word})
+;;   "RegExp for constrained emphasis (italic) text.
+;;   _I am italic_
+;;   [class='data']_me too_
+;;   \_But not me_")
+
 
 (defconst asciidoc--monospace-unconstrained-regexp
   (rx (not "\\")
@@ -193,7 +221,7 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
              (minimal-match (one-or-more any))
              "\`\`"))
   "RegExp for unconstrained \`\`monospace\`\` text.
-VS Code AsciiDoc: (?<!\\\\)(\\[.+?\\])?((``)(.+?)(``))")
+  VS Code AsciiDoc: (?<!\\\\)(\\[.+?\\])?((``)(.+?)(``))")
 
 
 (defconst asciidoc--monospace-constrained-regexp
@@ -211,6 +239,48 @@ VS Code AsciiDoc: (?<!\\\\)(\\[.+?\\])?((``)(.+?)(``))")
   "RegExp for constrained \`monospace`\ text.
 VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(?![\\p{Word}\"'`])")
 
+
+;; FIX REGEXP
+;; (defconst asciidoc--macro-block-general
+;;   ;; ^(\\p{Word}+)(::)(\\S*?)(\\[)((?:\\\\\\]|[^\\]])*?)(\\])$
+;;   (rx line-start ;; ^
+;;       (one-or-more word) ;; (\\p{Word}+)
+;;       "::" ;; (::)
+;;       (minimal-match (not space)) ;; (\\S*?)
+;;       "[" ;; (\\[)
+;;       ;; ((?:\\\\\\]|[^\\]])*?)
+;;       (minimal-match (or "\\]"
+;;                          (not "]")))
+;;       "]" ;; (\\])
+;;       line-end)
+;;"RegExp for general macro.
+;;attribute::[values]")
+
+
+(defconst asciidoc--comment-inline-regexp
+  ;; ^/{2}([^/].*)?$
+  (rx line-start
+      (repeat 2 ?/)
+      (optional (seq (not ?/))
+                (zero-or-more not-newline))
+      line-end)
+  "RegExp for inline commentary.
+// commentary")
+
+
+;; TODO
+;; (defconst asciidoc--comment-block-regexp
+;;   (rx (minimal-match
+;;        line-start
+;;        (group "////")
+;;        (group (zero-or-more any))
+;;        (group "////")
+;;        line-end))
+;;   "RegExp for block commentary.
+;; ////
+;; Comment
+;; Comment contiue
+;; ////")
 
 
 ;;; FACES
@@ -398,7 +468,8 @@ VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(
     (,asciidoc--monospace-unconstrained-regexp . ((1 asciidoc-macro-attributes-face)
                                                   (2 asciidoc-monospace-face)))
     (,asciidoc--monospace-constrained-regexp . ((1 asciidoc-macro-attributes-face)
-                                                (2 asciidoc-monospace-face)))))
+                                                (2 asciidoc-monospace-face)))
+    (,asciidoc--comment-inline-regexp . asciidoc-comment-face)))
 
 
 
