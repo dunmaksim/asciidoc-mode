@@ -149,6 +149,7 @@ Typical btn:[Open], and this regexp capture 2 groups:
 
 
 (defconst asciidoc--strong-constrained-regexp
+  ;; VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
   (rx (not (in "\\" ";" ":" word "*"))
       (group (zero-or-more "["
                            (minimal-match (one-or-more not-newline))
@@ -163,9 +164,7 @@ Typical btn:[Open], and this regexp capture 2 groups:
   "RegExp for constrained *strong* (bold) text.
 *I am bold*
 [class='data']*me too*
-* Not me*
-VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
-")
+* Not me*")
 
 
 (defconst asciidoc--emphasis-unconstrained-regexp
@@ -185,6 +184,7 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 
 
 (defconst asciidoc--monospace-unconstrained-regexp
+  ;; VS Code AsciiDoc: (?<!\\\\)(\\[.+?\\])?((``)(.+?)(``))
   (rx (not "\\")
       (group (zero-or-more "["
                            (minimal-match any)
@@ -192,8 +192,7 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
       (group "\`\`"
              (minimal-match (one-or-more any))
              "\`\`"))
-  "RegExp for unconstrained \`\`monospace\`\` text.
-  VS Code AsciiDoc: (?<!\\\\)(\\[.+?\\])?((``)(.+?)(``))")
+  "RegExp for unconstrained \`\`monospace\`\` text.")
 
 
 (defconst asciidoc--monospace-constrained-regexp
@@ -248,7 +247,7 @@ include::path-to-file[attributes]")
       (group (minimal-match (zero-or-more (or (not "\\")
                                               (not "]")))))
       (group "]"))
-  "RegExp for images and icons
+  "RegExp for images and icons.
 image:path-to-image[attributes]
 icon:path-to-icon[attributes]")
 
