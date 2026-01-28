@@ -503,6 +503,7 @@ icon:path-to-icon[attributes]")
   (font-lock-mode t)
 
   (setq-local comment-start "//")
+  (setq-local comment-end "")
   (setq-local font-lock-defaults '(asciidoc-mode-font-lock-keywords))
   (setq-local font-lock-multiline nil)
   (setq-local indent-tabs-mode nil)
