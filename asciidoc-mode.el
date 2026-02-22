@@ -483,6 +483,8 @@ icon:path-to-icon[attributes]")
   (let ((st (make-syntax-table)))
     (modify-syntax-entry ?\" "."  st) ; Prevent highlighting string in quotes
     (modify-syntax-entry ?\' "."  st) ; Prevent highlighting string in quotes
+    (modify-syntax-entry ?\. "."  st)
+    (modify-syntax-entry ?,  "."  st)
     (modify-syntax-entry ?\{ "(}" st)
     (modify-syntax-entry ?\} "){" st)
     (modify-syntax-entry ?\( "()" st)
@@ -507,6 +509,7 @@ icon:path-to-icon[attributes]")
   (setq-local font-lock-defaults '(asciidoc-mode-font-lock-keywords))
   (setq-local font-lock-multiline nil)
   (setq-local indent-tabs-mode nil)
+  (setq-local outline-regexp "=+[[:blank:]]+.+?")
   (setq-local parse-sexp-ignore-comments t)
   (setq-local require-final-newline mode-require-final-newline))
 
