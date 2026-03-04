@@ -485,7 +485,8 @@ icon:path-to-icon[attributes]")
     (modify-syntax-entry ?\' "."  st) ; Prevent highlighting string in quotes
     (modify-syntax-entry ?\. "."  st)
     (modify-syntax-entry ?,  "."  st)
-    (modify-syntax-entry ?\{ "(}" st)
+    (modify-syntax-entry ?`  "."  st)
+    (modify-syntax-entry ?\{ "(}" st) ; Brackets pairs
     (modify-syntax-entry ?\} "){" st)
     (modify-syntax-entry ?\( "()" st)
     (modify-syntax-entry ?\) ")(" st)
