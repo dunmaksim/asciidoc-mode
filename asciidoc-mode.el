@@ -258,12 +258,23 @@ image:path-to-image[attributes]
 icon:path-to-icon[attributes]")
 
 
-(defconst asciidoc--list-item
+(defconst asciidoc--unordered-list-item
   ;; ^\\p{Blank}*(-|\\*{1,5}|\\u2022{1,5})(?=\\p{Blank})
   (rx (zero-or-more blank)
       (group (repeat 1 5 (any "-" "*" "•")))
       whitespace)
   "RegExp for unordered lists.")
+
+(defconst asciidoc--ordered-list-item
+  ;; ^\\p{Blank}*(\\.{1,5}|\\d+\\.|[a-zA-Z]\\.|[IVXivx]+\\))(?=\\p{Blank})
+  (rx line-start
+      (zero-or-more blank)
+      (group (or (repeat 1 5 ".")
+                 (seq (one-or-more digit) ".")
+                 (seq (in "A-Za-z") ".")
+                 (one-or-more (in "I" "V" "X" "i" "v" "x"))))
+      whitespace)
+  "RegExp for ordered lists.")
 
 
 ;;; FACES
@@ -499,7 +510,8 @@ icon:path-to-icon[attributes]")
                                       (3 asciidoc-macro-attributes-face)
                                       (4 asciidoc-bracket-face)))
     ;; lists
-    (,asciidoc--list-item . ((1 asciidoc-list-item-marker-face)))))
+    (,asciidoc--unordered-list-item . ((1 asciidoc-list-item-marker-face)))
+    (,asciidoc--ordered-list-item . ((1 asciidoc-list-item-marker-face)))))
 
 
 ;;; SYNTAX TABLE

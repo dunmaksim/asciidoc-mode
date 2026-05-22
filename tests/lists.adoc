@@ -35,6 +35,14 @@ I) Item
 V) Item
 X) Item
 
+I Item
+V Item
+X item
+
+i item
+v item
+x item
+
 
 == Nested lists
 
