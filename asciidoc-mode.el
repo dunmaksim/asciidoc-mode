@@ -35,8 +35,7 @@
 (require 'font-lock)
 (require 'faces)
 
-(eval-when-compile
-  (require 'rx))
+(require 'rx)
 
 
 ;;; REGEXP
@@ -150,14 +149,21 @@ Typical btn:[Open], and this regexp capture 2 groups:
 
 (defconst asciidoc--strong-constrained-regexp
   ;; VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
+  ;; (?<![\\\\;:\\p{Word}\\*])
+  ;; (\\[.+?\\])?
+  ;; ((\\*)
+  ;;  (\\S|\\S.*?\\S)
+  ;;  (\\*)
+  ;;  (?!\\p{Word})
+  ;; )
   (rx (not (in "\\" ";" ":" word "*"))
       (group (zero-or-more "["
-                           (minimal-match (one-or-more not-newline))
+                           (minimal-match (one-or-more (not space)))
                            "]"))
       (group "*"
              (or (not space)
                  (seq (not space)
-                      (minimal-match (zero-or-more not-newline))
+                      (minimal-match (zero-or-more (not space)))
                       (not space)))
              "*")
       (not word))
@@ -251,6 +257,13 @@ include::path-to-file[attributes]")
 image:path-to-image[attributes]
 icon:path-to-icon[attributes]")
 
+
+(defconst asciidoc--list-item
+  ;; ^\\p{Blank}*(-|\\*{1,5}|\\u2022{1,5})(?=\\p{Blank})
+  (rx (zero-or-more blank)
+      (group (repeat 1 5 (any "-" "*" "•")))
+      whitespace)
+  "RegExp for unordered lists.")
 
 
 ;;; FACES
@@ -435,9 +448,18 @@ icon:path-to-icon[attributes]")
 (defvar asciidoc-bracket-face 'asciidoc-bracket-face)
 
 
+(defface asciidoc-list-item-marker-face '((t :inherit (font-lock-warning-face)))
+  "Face for unordered list items bullets."
+  :version "30.1"
+  :group 'asciidoc-faces)
+
+(defvar asciidoc-list-item-marker-face 'asciidoc-list-item-marker-face)
+
+
 ;; KEYWORDS
 (defvar asciidoc-mode-font-lock-keywords
-  `(;; Headers
+  `(
+    ;; Headers
     (,asciidoc--header-level-0-regexp . asciidoc-header-level-0-face)
     (,asciidoc--header-level-1-regexp . asciidoc-header-level-1-face)
     (,asciidoc--header-level-2-regexp . asciidoc-header-level-2-face)
@@ -475,7 +497,9 @@ icon:path-to-icon[attributes]")
     (,asciidoc--image-macro-regexp . ((1 asciidoc-directive-face)
                                       (2 asciidoc-bracket-face)
                                       (3 asciidoc-macro-attributes-face)
-                                      (4 asciidoc-bracket-face)))))
+                                      (4 asciidoc-bracket-face)))
+    ;; lists
+    (,asciidoc--list-item . ((1 asciidoc-list-item-marker-face)))))
 
 
 ;;; SYNTAX TABLE
