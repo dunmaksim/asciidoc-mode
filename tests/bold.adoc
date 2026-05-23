@@ -21,3 +21,11 @@ Simple *strong* test in the buffer.
 ** Nested list item 1
 
 ** Nested list item 2
+
+*** Level 3 list item
+
+*** Level 3 list item
+
+**** Level 4 list item
+
+**** Level 4 *bold* list item

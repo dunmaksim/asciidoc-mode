@@ -46,7 +46,6 @@
              (one-or-more not-newline))
       line-end)
   "Regexp for headers level 0.
-
 = Header level 0
 # Header level 0")
 
@@ -133,13 +132,14 @@ Typical btn:[Open], and this regexp capture 2 groups:
 
 (defconst asciidoc--strong-unconstrained-regexp
   ;; (?<!\\\\\\\\)(\\[.+?\\])?((\\*\\*)(.+?)(\\*\\*))")
-  (rx (not "\\")
-      (group (zero-or-more "["
-                           (minimal-match (one-or-more any))
-                           "]"))
-      (group "**"
-             (minimal-match (one-or-more any))
-             "**"))
+  (rx (seq (not "\\")
+           (not "\\"))
+      (group (? "["
+                (minimal-match (one-or-more any))
+                "]"))
+      (group (seq "**"
+                  (minimal-match (one-or-more any))
+                  "**")))
   "Regexp for unconstrained **strong** (bold) text.
 **I am bold**
 [class='data']**me too**
@@ -147,30 +147,30 @@ Typical btn:[Open], and this regexp capture 2 groups:
 ** Not me too")
 
 
+;; BUG: This regexp is wrong.
 (defconst asciidoc--strong-constrained-regexp
-  ;; VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
-  ;; (?<![\\\\;:\\p{Word}\\*])
-  ;; (\\[.+?\\])?
-  ;; ((\\*)
-  ;;  (\\S|\\S.*?\\S)
-  ;;  (\\*)
-  ;;  (?!\\p{Word})
-  ;; )
-  (rx (not (in "\\" ";" ":" word "*"))
-      (group (zero-or-more "["
-                           (minimal-match (one-or-more (not space)))
-                           "]"))
+  ;; Original RegExp: (?<![\\\\;:\\p{Word}\\*])(\\[.+?\\])?((\\*)(\\S|\\S.*?\\S)(\\*)(?!\\p{Word}))
+  ;; RegExp parts:
+  ;; 1. (?<![\\\\;:\\p{Word}\\*])
+  ;; 2. (\\[.+?\\])?
+  ;; 3. (
+  ;;   3.1 (\\*)
+  ;;   3.2 (\\S|\\S.*?\\S)
+  ;;   3.3 (\\*)
+  ;;   3.4 (?!\\p{Word})
+  ;;  )
+  (rx (not (in "\\" ":" ";" word "*"))
+      (group (? "["
+                (minimal-match (one-or-more (not space)))
+                "]"))
       (group "*"
              (or (not space)
                  (seq (not space)
-                      (minimal-match (zero-or-more (not space)))
+                      (minimal-match (zero-or-more any))
                       (not space)))
              "*")
       (not word))
-  "RegExp for constrained *strong* (bold) text.
-*I am bold*
-[class='data']*me too*
-* Not me*")
+  "RegExp for constrained *bold* text.")
 
 
 (defconst asciidoc--emphasis-unconstrained-regexp
@@ -202,7 +202,17 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
 
 
 (defconst asciidoc--monospace-constrained-regexp
-  (rx (not (in "\\" ";" ":" word "'" "\`"))
+  ;; VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(?![\\p{Word}\"'`])
+  ;; Parts:
+  ;; 1. (?<![\\\\;:\\p{Word}\"'`])
+  ;; 2. (\\[.+?\\])?
+  ;; 3. (
+  ;;   3.1 (`)
+  ;;   3.2 (\\S|\\S.*?\\S)
+  ;;   3.3 (`)
+  ;;   )
+  ;; 4. (?![\\p{Word}\"'`])
+  (rx (not (in "\\" ";" ":" word "\"" "'" "\`"))
       (group (zero-or-more "["
                            (minimal-match (one-or-more any))
                            "]"))
@@ -212,9 +222,8 @@ VS Code Asciidoc: (?<!\\\\\\\\)(\\[(?:[^\\]]+?)\\])?((__)((?!_).+?)(__))")
                       (minimal-match (zero-or-more any))
                       (not space)))
              "\`")
-      (not (in word "\\" "'" "\`")))
-  "RegExp for constrained \`monospace`\ text.
-VS Code AsciiDoc: (?<![\\\\;:\\p{Word}\"'`])(\\[.+?\\])?((`)(\\S|\\S.*?\\S)(`))(?![\\p{Word}\"'`])")
+      (not (in word "\"" "'" "\`")))
+  "RegExp for constrained \`monospace`\ text.")
 
 
 (defconst asciidoc--comment-inline-regexp
@@ -260,8 +269,11 @@ icon:path-to-icon[attributes]")
 
 (defconst asciidoc--unordered-list-item
   ;; ^\\p{Blank}*(-|\\*{1,5}|\\u2022{1,5})(?=\\p{Blank})
-  (rx (zero-or-more blank)
-      (group (repeat 1 5 (any "-" "*" "•")))
+  (rx line-start
+      (zero-or-more blank)
+      (group (or "-"
+                 (repeat 1 5 "*")
+                 (repeat 1 5 "•")))
       whitespace)
   "RegExp for unordered lists.")
 
