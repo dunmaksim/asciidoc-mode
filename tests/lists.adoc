@@ -31,10 +31,6 @@
 2. Item
 3. Item
 
-I) Item
-V) Item
-X) Item
-
 I Item
 V Item
 X item
@@ -61,4 +57,3 @@ x item
 - [ ] Todo item
 - [*] Todo item
 - [x] Todo item
-*

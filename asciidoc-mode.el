@@ -277,6 +277,7 @@ icon:path-to-icon[attributes]")
       whitespace)
   "RegExp for unordered lists.")
 
+
 (defconst asciidoc--ordered-list-item-regexp
   ;; ^\\p{Blank}*(\\.{1,5}|\\d+\\.|[a-zA-Z]\\.|[IVXivx]+\\))(?=\\p{Blank})
   (rx line-start
@@ -287,6 +288,26 @@ icon:path-to-icon[attributes]")
                  (one-or-more (in "I" "V" "X" "i" "v" "x"))))
       whitespace)
   "RegExp for ordered lists.")
+
+
+(defconst asciidoc--todo-list-item-regexp
+  ;; ^\\s*(-)\\p{Blank}(\\[[\\p{Blank}\\*x]\\])(?=\\p{Blank})
+  ;; Parts:
+  ;;   1. ^
+  ;;   2. \\s*
+  ;;   3. (-)
+  ;;   4. \\p{Blank}
+  ;;   5. (\\[[\\p{Blank}\\*x]\\])
+  ;;   6. (?=\\p{Blank})
+  (rx line-start
+      (zero-or-more blank)
+      (group "-")
+      blank
+      (group (seq "["
+                  (in blank "x" "*")
+                  "]"))
+      blank)
+  "RegExp for TODO list item.")
 
 
 (defconst asciidoc--admonition-keywords-regexp
@@ -334,6 +355,28 @@ icon:path-to-icon[attributes]")
           "tikz"
           "wavedrom"))
   "RegExp for diagrams.")
+
+
+(defconst asciidoc--other-keywords-regexp
+  ;; (sect[1-4]|preface|colophon|dedication|glossary|bibliography|synopsis|appendix|index|normal|partintro|music|latex|stem)"
+  (rx (or "appendix"
+          "bibliography"
+          "colophon"
+          "dedication"
+          "glossary"
+          "index"
+          "latex"
+          "music"
+          "normal"
+          "partintro"
+          "preface"
+          "sect1"
+          "sect2"
+          "sect3"
+          "sect4"
+          "stem"
+          "synopsis"))
+  "RegExp for miscelannous keywords.")
 
 
 ;;; FACES
@@ -571,13 +614,16 @@ icon:path-to-icon[attributes]")
     ;; lists
     (,asciidoc--unordered-list-item-regexp . ((1 asciidoc-list-item-marker-face)))
     (,asciidoc--ordered-list-item-regexp . ((1 asciidoc-list-item-marker-face)))
+    (,asciidoc--todo-list-item-regexp . ((1 asciidoc-list-item-marker-face)
+                                         (2 asciidoc-bracket-face)))
     ;; Admonitions
     (,asciidoc--admonition-keywords-regexp . font-lock-keyword-face)
     ;; Paragraphs and verbatims
     (,asciidoc--paragraph-or-verbatim-regexp . font-lock-keyword-face)
     ;; Diagrams
     (,asciidoc--diagram-keywords-regexp . font-lock-keyword-face)
-    ))
+    ;; Other keywords
+    (,asciidoc--other-keywords-regexp . font-lock-keyword-face)))
 
 
 ;;; SYNTAX TABLE
