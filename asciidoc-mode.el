@@ -267,7 +267,7 @@ image:path-to-image[attributes]
 icon:path-to-icon[attributes]")
 
 
-(defconst asciidoc--unordered-list-item
+(defconst asciidoc--unordered-list-item-regexp
   ;; ^\\p{Blank}*(-|\\*{1,5}|\\u2022{1,5})(?=\\p{Blank})
   (rx line-start
       (zero-or-more blank)
@@ -277,7 +277,7 @@ icon:path-to-icon[attributes]")
       whitespace)
   "RegExp for unordered lists.")
 
-(defconst asciidoc--ordered-list-item
+(defconst asciidoc--ordered-list-item-regexp
   ;; ^\\p{Blank}*(\\.{1,5}|\\d+\\.|[a-zA-Z]\\.|[IVXivx]+\\))(?=\\p{Blank})
   (rx line-start
       (zero-or-more blank)
@@ -287,6 +287,53 @@ icon:path-to-icon[attributes]")
                  (one-or-more (in "I" "V" "X" "i" "v" "x"))))
       whitespace)
   "RegExp for ordered lists.")
+
+
+(defconst asciidoc--admonition-keywords-regexp
+  ;; (NOTE|TIP|IMPORTANT|WARNING|CAUTION)
+  (rx (or "CAUTION"
+          "IMPORTANT"
+          "NOTE"
+          "TIP"
+          "WARNING"))
+  "RegExp for admonitions.")
+
+
+(defconst asciidoc--paragraph-or-verbatim-regexp
+  ;; (comment|example|literal|listing|normal|pass|quote|sidebar|source|verse|abstract|partintro)
+  (rx (or "abstract"
+          "comment"
+          "example"
+          "listing"
+          "literal"
+          "normal"
+          "partintro"
+          "pass"
+          "quote"
+          "sidebar"
+          "source"
+          "verse"))
+  "RegExp for pararaphs and verbatims.")
+
+
+(defconst asciidoc--diagram-keywords-regexp
+  ;; (actdiag|blockdiag|ditaa|graphviz|tikz|meme|mermaid|nwdiag|packetdiag|pikchr|plantuml|rackdiag|seqdiag|shaape|wavedrom)"
+  (rx (or "actdiag"
+          "blockdiag"
+          "ditaa"
+          "graphviz"
+          "meme"
+          "mermaid"
+          "nwdiag"
+          "packetdiag"
+          "pikchr"
+          "plantuml"
+          "rackdiag"
+          "seqdiag"
+          "shaape"
+          "tikz"
+          "wavedrom"))
+  "RegExp for diagrams.")
 
 
 ;;; FACES
@@ -522,8 +569,15 @@ icon:path-to-icon[attributes]")
                                       (3 asciidoc-macro-attributes-face)
                                       (4 asciidoc-bracket-face)))
     ;; lists
-    (,asciidoc--unordered-list-item . ((1 asciidoc-list-item-marker-face)))
-    (,asciidoc--ordered-list-item . ((1 asciidoc-list-item-marker-face)))))
+    (,asciidoc--unordered-list-item-regexp . ((1 asciidoc-list-item-marker-face)))
+    (,asciidoc--ordered-list-item-regexp . ((1 asciidoc-list-item-marker-face)))
+    ;; Admonitions
+    (,asciidoc--admonition-keywords-regexp . font-lock-keyword-face)
+    ;; Paragraphs and verbatims
+    (,asciidoc--paragraph-or-verbatim-regexp . font-lock-keyword-face)
+    ;; Diagrams
+    (,asciidoc--diagram-keywords-regexp . font-lock-keyword-face)
+    ))
 
 
 ;;; SYNTAX TABLE
